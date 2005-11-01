@@ -91,10 +91,10 @@ void sqlbox_configure_mysql(Cfg* cfg)
 	}
 
 	/* create send_sms && sent_sms tables if they do not exist */
-	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata varchar(255) null, msgdata varchar(255) null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_logtable);
+	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_logtable);
 	sql_update(sql);
 	octstr_destroy(sql);
-	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata varchar(255) null, msgdata varchar(255) null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_insert_table);
+	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_insert_table);
 	sql_update(sql);
 	octstr_destroy(sql);
 	/* end table creation */
@@ -257,10 +257,10 @@ found:
 
     if (!(mysql_host = cfg_get(grp, octstr_imm("host"))))
    	    panic(0, "SQLBOX: MySQL: directive 'host' is not specified!");
-    if (!(mysql_user = cfg_get(grp, octstr_imm("mysql-username"))))
-   	    panic(0, "SQLBOX: MySQL: directive 'mysql-username' is not specified!");
-    if (!(mysql_pass = cfg_get(grp, octstr_imm("mysql-password"))))
-   	    panic(0, "SQLBOX: MySQL: directive 'mysql-password' is not specified!");
+    if (!(mysql_user = cfg_get(grp, octstr_imm("username"))))
+   	    panic(0, "SQLBOX: MySQL: directive 'username' is not specified!");
+    if (!(mysql_pass = cfg_get(grp, octstr_imm("password"))))
+   	    panic(0, "SQLBOX: MySQL: directive 'password' is not specified!");
     if (!(mysql_db = cfg_get(grp, octstr_imm("database"))))
    	    panic(0, "SQLBOX: MySQL: directive 'database' is not specified!");
 

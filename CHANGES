@@ -1,0 +1,8 @@
+2005/11/01
+	Applied patch of Thomas Gottgens: The fields udhdata and msgdata are now created
+	as blob and text fields.
+	Also some fields of Kannel.conf are renamed to match CVS HEAD revision of the
+	gateway module.
+
+2005/09/29
+	First repository release of sqlbox.
