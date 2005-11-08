@@ -37,16 +37,16 @@ static void* pgsql_open_conn(const DBConf *db_conf)
     if (conf == NULL)
         return NULL;
      
-    sprintf(tmp, " host=%s", octstr_get_cstr(conf->pghost));    
+    sprintf(tmp, " host=%s", octstr_get_cstr(conf->host));    
     if (strlen(tmp)) strcat(cs, tmp);
     
-    sprintf(tmp, " user=%s", octstr_get_cstr(conf->login));
+    sprintf(tmp, " user=%s", octstr_get_cstr(conf->username));
     if (strlen(tmp)) strcat(cs, tmp);
     
     sprintf(tmp, " password=%s", octstr_get_cstr(conf->password));
     if (strlen(tmp)) strcat(cs, tmp);
     
-    sprintf(tmp, " dbname=%s", octstr_get_cstr(conf->dbName));
+    sprintf(tmp, " dbname=%s", octstr_get_cstr(conf->database));
     if (strlen(tmp)) strcat(cs, tmp);
 
   /*
@@ -62,13 +62,13 @@ static void* pgsql_open_conn(const DBConf *db_conf)
     gw_assert (conn != NULL);
 
     if (PQstatus(conn) == CONNECTION_BAD) {
-        error(0, "PGSQL: connection to database %s failed!", octstr_get_cstr(conf->dbName)); 
+        error(0, "PGSQL: connection to database %s failed!", octstr_get_cstr(conf->database)); 
 	error(0, "PGSQL: %s", PQerrorMessage(conn));
        goto failed;
     }
     
 
-    info(0, "PGSQL: Connected to server at %s.", octstr_get_cstr(conf->pghost));
+    info(0, "PGSQL: Connected to server at %s.", octstr_get_cstr(conf->host));
 
     return conn;
 
@@ -299,7 +299,7 @@ struct server_type *sqlbox_init_pgsql(Cfg* cfg)
      */
 
      grplist = cfg_get_multi_group(cfg, octstr_imm("pgsql-connection"));
-     while (grplist && (grp = list_extract_first(grplist)) != NULL) {
+     while (grplist && (grp = (CfgGroup *)gwlist_extract_first(grplist)) != NULL) {
         p = cfg_get(grp, octstr_imm("id"));
         if (p != NULL && octstr_compare(p, pgsql_id) == 0) {
             goto found;
@@ -311,7 +311,7 @@ struct server_type *sqlbox_init_pgsql(Cfg* cfg)
 
 found:
     octstr_destroy(p);
-    list_destroy(grplist, NULL);
+    gwlist_destroy(grplist, NULL);
 
     if (cfg_get_integer(&pool_size, grp, octstr_imm("max-connections")) == -1 || pool_size == 0)
         pool_size = 1;
@@ -334,10 +334,10 @@ found:
     db_conf->pgsql = gw_malloc(sizeof(PgSQLConf));
     gw_assert(db_conf->pgsql != NULL);
 
-    db_conf->pgsql->pghost = pgsql_host;
-    db_conf->pgsql->login = pgsql_user;
+    db_conf->pgsql->host = pgsql_host;
+    db_conf->pgsql->username = pgsql_user;
     db_conf->pgsql->password = pgsql_pass;
-    db_conf->pgsql->dbName = pgsql_db;
+    db_conf->pgsql->database = pgsql_db;
 
     pool = dbpool_create(DBPOOL_MYSQL, db_conf, pool_size);
     gw_assert(pool != NULL);
