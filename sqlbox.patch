@@ -4,7 +4,7 @@ RCS file: /home/cvs/gateway/Makefile.in,v
 retrieving revision 1.76
 diff -u -r1.76 Makefile.in
 --- Makefile.in	26 Sep 2005 16:08:14 -0000	1.76
-+++ Makefile.in	29 Sep 2005 14:14:51 -0000
++++ Makefile.in	8 Nov 2005 01:25:58 -0000
 @@ -112,6 +112,7 @@
  	gw/bearerbox.c \
  	gw/smsbox.c \
@@ -16,10 +16,10 @@ diff -u -r1.76 Makefile.in
 Index: configure
 ===================================================================
 RCS file: /home/cvs/gateway/configure,v
-retrieving revision 1.154
-diff -u -r1.154 configure
---- configure	27 Sep 2005 15:39:41 -0000	1.154
-+++ configure	29 Sep 2005 14:14:51 -0000
+retrieving revision 1.155
+diff -u -r1.155 configure
+--- configure	3 Nov 2005 17:39:20 -0000	1.155
++++ configure	8 Nov 2005 01:25:58 -0000
 @@ -85,6 +85,12 @@
    --with-pgsql-dir=DIR    where to look for PostgreSQL libs and header files
                            DIR points to the installation [/usr/local/pgsql] "
@@ -37,20 +37,20 @@ diff -u -r1.154 configure
          echo "$ac_t""$mysql_version" 1>&6
                  MYSQL_LIBS=""
          if $MYSQL_CONFIG --libs_r &>/dev/null ; then
--            MYSQL_LIBS="$($MYSQL_CONFIG --libs_r)"
-+	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/'//g"`
+-            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r`
++ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/'//g"`
              echo $ac_n "checking mysql reentrant libs""... $ac_c" 1>&6
  echo "configure:4628: checking mysql reentrant libs" >&5
-             echo "$ac_t"" $MYSQL_LIBS " 1>&6
+             echo "$ac_t""$MYSQL_LIBS" 1>&6
 @@ -4669,7 +4675,7 @@
  
          fi
          if test -z "$MYSQL_LIBS" ; then
--            MYSQL_LIBS="$($MYSQL_CONFIG --libs)"
-+	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/'//g"`
+-            MYSQL_LIBS=`$MYSQL_CONFIG --libs`
++ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/'//g"`
              echo $ac_n "checking mysql libs""... $ac_c" 1>&6
  echo "configure:4675: checking mysql libs" >&5
-             echo "$ac_t"" $MYSQL_LIBS " 1>&6
+             echo "$ac_t""$MYSQL_LIBS" 1>&6
 @@ -5737,6 +5743,269 @@
  
  
@@ -324,26 +324,26 @@ diff -u -r1.154 configure
 Index: configure.in
 ===================================================================
 RCS file: /home/cvs/gateway/configure.in,v
-retrieving revision 1.159
-diff -u -r1.159 configure.in
---- configure.in	27 Sep 2005 15:39:41 -0000	1.159
-+++ configure.in	29 Sep 2005 14:14:51 -0000
+retrieving revision 1.160
+diff -u -r1.160 configure.in
+--- configure.in	3 Nov 2005 17:39:20 -0000	1.160
++++ configure.in	8 Nov 2005 01:25:58 -0000
 @@ -919,14 +919,14 @@
          dnl mysql-4.x style
          MYSQL_LIBS=""
          if $MYSQL_CONFIG --libs_r &>/dev/null ; then
--            MYSQL_LIBS="$($MYSQL_CONFIG --libs_r)"
-+	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/\x27//g"`
+-            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r`
++ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/\x27//g"`
              AC_MSG_CHECKING([mysql reentrant libs])
-             AC_MSG_RESULT([ $MYSQL_LIBS ])
+             AC_MSG_RESULT([$MYSQL_LIBS])
              AC_CHECK_LIB(mysqlclient_r, mysql_init, [ LIBS="$LIBS $MYSQL_LIBS" ],
                  [ MYSQL_LIBS="" ], [ $MYSQL_LIBS ])
          fi
          if test -z "$MYSQL_LIBS" ; then
--            MYSQL_LIBS="$($MYSQL_CONFIG --libs)"
-+	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/\x27//g"`
+-            MYSQL_LIBS=`$MYSQL_CONFIG --libs`
++ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/\x27//g"`
              AC_MSG_CHECKING([mysql libs])
-             AC_MSG_RESULT([ $MYSQL_LIBS ])
+             AC_MSG_RESULT([$MYSQL_LIBS])
              AC_CHECK_LIB(mysqlclient, mysql_init, [ LIBS="$LIBS $MYSQL_LIBS" ],
 @@ -1176,6 +1176,80 @@
  
@@ -432,7 +432,7 @@ RCS file: /home/cvs/gateway/gw/smsbox.c,v
 retrieving revision 1.259
 diff -u -r1.259 smsbox.c
 --- gw/smsbox.c	19 Sep 2005 22:07:32 -0000	1.259
-+++ gw/smsbox.c	29 Sep 2005 14:14:51 -0000
++++ gw/smsbox.c	8 Nov 2005 01:25:58 -0000
 @@ -3269,7 +3269,7 @@
      Octstr *http_proxy_password = NULL;
      Octstr *http_proxy_exceptions_regex = NULL;
@@ -467,7 +467,7 @@ RCS file: /home/cvs/gateway/gwlib/cfg.def,v
 retrieving revision 1.112
 diff -u -r1.112 cfg.def
 --- gwlib/cfg.def	21 Sep 2005 02:01:22 -0000	1.112
-+++ gwlib/cfg.def	29 Sep 2005 14:14:51 -0000
++++ gwlib/cfg.def	8 Nov 2005 01:25:58 -0000
 @@ -240,6 +240,7 @@
  SINGLE_GROUP(smsbox,
      OCTSTR(smsbox-id)
