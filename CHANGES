@@ -3,6 +3,9 @@
 	as blob and text fields.
 	Also some fields of Kannel.conf are renamed to match CVS HEAD revision of the
 	gateway module.
+	mysql-username is now "username"
+	mysql-password is now "password"
+	mysql-host is now "host"
 
 2005/09/29
 	First repository release of sqlbox.
