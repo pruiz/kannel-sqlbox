@@ -1,0 +1,6 @@
+Note:
+
+If you are upgrading from an previous sqlbox version BEFORE 20060530, you will have to modify your
+existing sql table structure by issuing the following command:
+
+alter table sent_sms modify  momt enum('MO','MT','DLR');

@@ -341,8 +341,11 @@ static void bearerbox_to_smsbox(void *arg)
 		msg_destroy(msg);
 		break;
 	}
-	if (msg_type(msg) == sms) {
-		gw_sql_save_msg(msg, octstr_imm("MO"));
+	if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
+		if (msg->sms.sms_type != report_mo)
+		    gw_sql_save_msg(msg, octstr_imm("MO"));
+		else
+		    gw_sql_save_msg(msg, octstr_imm("DLR"));
 	}
 	send_msg(conn->smsbox_connection, conn, msg);
         msg_destroy(msg);
@@ -454,8 +457,11 @@ static void bearerbox_to_sql(void *arg)
 			debug("sqlbox", 0, "bearerbox_to_sql: connection to bearerbox died.");
 			break;
 		}
-		if (msg_type(msg) == sms) {
-			gw_sql_save_msg(msg, octstr_imm("MO"));
+		if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
+			if (msg->sms.sms_type != report_mo)
+			    gw_sql_save_msg(msg, octstr_imm("MO"));
+			else
+			    gw_sql_save_msg(msg, octstr_imm("DLR"));
 		}
 		msg_destroy(msg);
 	}
@@ -593,7 +599,6 @@ static void init_sqlbox(Cfg *cfg)
 	int ssl = 0;
 
 	/* some default values */
-	sqlbox_port = 13005;
 	sqlbox_port_ssl = 0;
 	bearerbox_host = octstr_create(BB_DEFAULT_HOST);
 	bearerbox_port = BB_DEFAULT_SMSBOX_PORT;
@@ -622,6 +627,8 @@ static void init_sqlbox(Cfg *cfg)
 	sqlbox_id = cfg_get(grp, octstr_imm("smsbox-id"));
 	global_sender = cfg_get(grp, octstr_imm("global-sender"));
 
+	if (cfg_get_integer(&sqlbox_port, grp, octstr_imm("smsbox-port")) == -1)
+		sqlbox_port = 13005;
 	/* setup logfile stuff */
 	logfile = cfg_get(grp, octstr_imm("log-file"));
 

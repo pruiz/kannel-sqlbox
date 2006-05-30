@@ -91,7 +91,7 @@ void sqlbox_configure_mysql(Cfg* cfg)
 	}
 
 	/* create send_sms && sent_sms tables if they do not exist */
-	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_logtable);
+	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT', 'DLR') null, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_logtable);
 	sql_update(sql);
 	octstr_destroy(sql);
 	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id bigint(20) not null auto_increment primary key, momt enum('MO', 'MT') null, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_insert_table);
@@ -215,7 +215,8 @@ struct server_type *sqlbox_init_mysql(Cfg* cfg)
     List *grplist;
     Octstr *mysql_host, *mysql_user, *mysql_pass, *mysql_db, *mysql_id;
     Octstr *p = NULL;
-    long pool_size;
+    long pool_size, mysql_port;
+    int have_port;
     DBConf *db_conf = NULL;
     struct server_type *res = NULL;
 
@@ -263,6 +264,7 @@ found:
    	    panic(0, "SQLBOX: MySQL: directive 'password' is not specified!");
     if (!(mysql_db = cfg_get(grp, octstr_imm("database"))))
    	    panic(0, "SQLBOX: MySQL: directive 'database' is not specified!");
+    have_port = (cfg_get_integer(&mysql_port, grp, octstr_imm("port")) != -1);
 
     /*
      * ok, ready to connect to MySQL
@@ -277,6 +279,9 @@ found:
     db_conf->mysql->username = mysql_user;
     db_conf->mysql->password = mysql_pass;
     db_conf->mysql->database = mysql_db;
+    if (have_port) {
+	db_conf->mysql->port = mysql_port;
+    }
 
     pool = dbpool_create(DBPOOL_MYSQL, db_conf, pool_size);
     gw_assert(pool != NULL);

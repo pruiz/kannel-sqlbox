@@ -10,3 +10,4 @@ all:
 patch:
 	patch -p0 -d ${KANNEL} < sqlbox.patch
 	@for f in gw/*.c gw/*.h gwlib/*.c; do echo Copying $$f; cp -f $$f ${KANNEL}/$$f; done
+	@echo If you are upgrading, read the UPGRADE document.

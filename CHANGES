@@ -1,3 +1,13 @@
+2006/05/30
+	- Applied patch of Martin <reflejo@gmail.com> for the bug:
+	SQLbox is not reading smsbox-port. It is hardcoded to 13005.
+	- Applied patch of Martin <reflejo@gmail.com>:
+	Delivery reports are now stored as 'DLR' in the MOMT database field.
+	This makes it easier to filter them out if you are only interested in
+	MO messages while reading the sent_sms table.
+	- Bug fixed by Rene Kluwen <rene.kluwen@chimit.nl>:
+	sqlbox now reads the port value from the mysql-connection group.
+
 2005/11/01
 	Applied patch of Thomas Gottgens: The fields udhdata and msgdata are now created
 	as blob and text fields.
