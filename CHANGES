@@ -1,3 +1,6 @@
+2006/06/14
+	make patch failure fixed by Martin Conte
+
 2006/05/30
 	- Applied patch of Martin <reflejo@gmail.com> for the bug:
 	SQLbox is not reading smsbox-port. It is hardcoded to 13005.
