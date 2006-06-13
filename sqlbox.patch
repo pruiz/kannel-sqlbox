@@ -3,8 +3,8 @@ Index: Makefile.in
 RCS file: /home/cvs/gateway/Makefile.in,v
 retrieving revision 1.79
 diff -u -r1.79 Makefile.in
---- Makefile.in	9 May 2006 05:46:56 -0000	1.79
-+++ Makefile.in	30 May 2006 17:44:18 -0000
+--- Makefile.in.orig	2006-06-13 15:36:38.000000000 -0600
++++ Makefile.in	2006-06-13 15:36:20.000000000 -0600
 @@ -112,6 +112,7 @@
  	gw/bearerbox.c \
  	gw/smsbox.c \
@@ -18,41 +18,28 @@ Index: configure
 RCS file: /home/cvs/gateway/configure,v
 retrieving revision 1.160
 diff -u -r1.160 configure
---- configure	22 Mar 2006 21:02:25 -0000	1.160
-+++ configure	30 May 2006 17:44:18 -0000
-@@ -85,6 +85,12 @@
-   --with-pgsql-dir=DIR    where to look for PostgreSQL libs and header files
-                           DIR points to the installation [/usr/local/pgsql] "
- ac_help="$ac_help
-+  --with-ctlib[=DIR]      Include Ct-Lib support.  DIR is the Ct-Lib
-+                          install directory, defaults to /opt/sybase."
-+ac_help="$ac_help
-+  --with-freetds[=DIR]    Include FreeTDS Ct-Lib support.  DIR is the FreeTDS
-+                          install directory, defaults to /usr/local."
-+ac_help="$ac_help
-   --with-wtls[=TYPE]      select WTLS version to use: openssl/baltimore"
- 
- # Initialize some variables set by options.
-@@ -4613,7 +4619,7 @@
-         echo "$ac_t""$mysql_version" 1>&6
+--- configure.orig  2006-06-13 15:13:45.000000000 -0600
++++ configure   2006-06-13 15:13:33.000000000 -0600
+@@ -10880,7 +10880,7 @@
+ echo "${ECHO_T}$mysql_version" >&6
                  MYSQL_LIBS=""
          if $MYSQL_CONFIG --libs_r &>/dev/null ; then
 -            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r`
-+ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/'//g"`
-             echo $ac_n "checking mysql reentrant libs""... $ac_c" 1>&6
- echo "configure:4619: checking mysql reentrant libs" >&5
-             echo "$ac_t""$MYSQL_LIBS" 1>&6
-@@ -4660,7 +4666,7 @@
++            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/'//g"`
+             echo "$as_me:$LINENO: checking mysql reentrant libs" >&5
+ echo $ECHO_N "checking mysql reentrant libs... $ECHO_C" >&6
+             echo "$as_me:$LINENO: result: $MYSQL_LIBS" >&5
+@@ -10957,7 +10957,7 @@
  
          fi
          if test -z "$MYSQL_LIBS" ; then
 -            MYSQL_LIBS=`$MYSQL_CONFIG --libs`
-+ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/'//g"`
-             echo $ac_n "checking mysql libs""... $ac_c" 1>&6
- echo "configure:4666: checking mysql libs" >&5
-             echo "$ac_t""$MYSQL_LIBS" 1>&6
-@@ -5728,6 +5734,269 @@
- 
++            MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/'//g"`
+             echo "$as_me:$LINENO: checking mysql libs" >&5
+ echo $ECHO_N "checking mysql libs... $ECHO_C" >&6
+             echo "$as_me:$LINENO: result: $MYSQL_LIBS" >&5
+@@ -12880,7 +12880,262 @@
+ fi;
  
  
 +echo $ac_n "checking for Ct-Lib support""... $ac_c" 1>&6
@@ -61,27 +48,27 @@ diff -u -r1.160 configure
 +if test "${with_ctlib+set}" = set; then
 +  withval="$with_ctlib"
 +  
-+	if test "$withval" = "yes"; then
-+		withval=/opt/sybase
-+	fi
++    if test "$withval" = "yes"; then
++        withval=/opt/sybase
++    fi
 +
-+	if test "$withval" != "no"; then
-+		if test -f $withval/include/ctpublic.h; then
-+			CTLIB_INCDIR=$withval/include
-+			CTLIB_LIBDIR=$withval/lib
-+		else
-+    			echo "$ac_t""no" 1>&6
-+			{ echo "configure: error: Invalid Ct-Lib directory - unable to find ctpublic.h" 1>&2; exit 1; }
-+		fi
-+		CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct -lcs -lsybtcl -lcomn -lintl"
-+		CTLIB_INCLUDE="-I$CTLIB_INCDIR"
-+		cat >> confdefs.h <<\EOF
++    if test "$withval" != "no"; then
++        if test -f $withval/include/ctpublic.h; then
++            CTLIB_INCDIR=$withval/include
++            CTLIB_LIBDIR=$withval/lib
++        else
++                echo "$ac_t""no" 1>&6
++            { echo "configure: error: Invalid Ct-Lib directory - unable to find ctpublic.h" 1>&2; exit 1; }
++        fi
++        CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct -lcs -lsybtcl -lcomn -lintl"
++        CTLIB_INCLUDE="-I$CTLIB_INCDIR"
++        cat >> confdefs.h <<\EOF
 +#define HAVE_CTLIB 1
 +EOF
 +
-+		echo "$ac_t""yes" 1>&6
-+		have_db=yes
-+				echo $ac_n "checking for dlopen""... $ac_c" 1>&6
++        echo "$ac_t""yes" 1>&6
++        have_db=yes
++                echo $ac_n "checking for dlopen""... $ac_c" 1>&6
 +echo "configure:5097: checking for dlopen" >&5
 +if eval "test \"`echo '$''{'ac_cv_func_dlopen'+set}'`\" = set"; then
 +  echo $ac_n "(cached) $ac_c" 1>&6
@@ -169,7 +156,7 @@ diff -u -r1.160 configure
 +
 +fi
 +
-+	fi
++    fi
 +    if test "x$DBTYPE" = "x" ; then
 +       DBTYPE="ctlib"
 +    else
@@ -179,41 +166,38 @@ diff -u -r1.160 configure
 +
 +else
 +  
-+	echo "$ac_t""no" 1>&6
++    echo "$ac_t""no" 1>&6
 +
 +fi
 +
-+
-+
-+
-+
+ 
 +echo $ac_n "checking for FreeTDS Ct-Lib support""... $ac_c" 1>&6
 +echo "configure:5203: checking for FreeTDS Ct-Lib support" >&5
 +# Check whether --with-freetds or --without-freetds was given.
 +if test "${with_freetds+set}" = set; then
 +  withval="$with_freetds"
 +  
-+	if test "$withval" = "yes"; then
-+		withval=/usr/local
-+	fi
++    if test "$withval" = "yes"; then
++        withval=/usr/local
++    fi
 +
-+	if test "$withval" != "no"; then
-+		if test -f $withval/include/ctpublic.h; then
-+			CTLIB_INCDIR=$withval/include
-+			CTLIB_LIBDIR=$withval/lib
-+		else
-+    			echo "$ac_t""no" 1>&6
-+			{ echo "configure: error: Invalid FreeTDS directory - unable to find ctpublic.h" 1>&2; exit 1; }
-+		fi
-+		CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct"
-+		CTLIB_INCLUDE="-I$CTLIB_INCDIR"
-+		cat >> confdefs.h <<\EOF
++    if test "$withval" != "no"; then
++        if test -f $withval/include/ctpublic.h; then
++            CTLIB_INCDIR=$withval/include
++            CTLIB_LIBDIR=$withval/lib
++        else
++                echo "$ac_t""no" 1>&6
++            { echo "configure: error: Invalid FreeTDS directory - unable to find ctpublic.h" 1>&2; exit 1; }
++        fi
++        CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct"
++        CTLIB_INCLUDE="-I$CTLIB_INCDIR"
++        cat >> confdefs.h <<\EOF
 +#define HAVE_CTLIB 1
 +EOF
 +
-+		echo "$ac_t""yes" 1>&6
-+		have_db=yes
-+		echo $ac_n "checking for dlopen""... $ac_c" 1>&6
++        echo "$ac_t""yes" 1>&6
++        have_db=yes
++        echo $ac_n "checking for dlopen""... $ac_c" 1>&6
 +echo "configure:5229: checking for dlopen" >&5
 +if eval "test \"`echo '$''{'ac_cv_func_dlopen'+set}'`\" = set"; then
 +  echo $ac_n "(cached) $ac_c" 1>&6
@@ -301,7 +285,7 @@ diff -u -r1.160 configure
 +
 +fi
 +
-+	fi
++    fi
 +    if test "x$DBTYPE" = "x" ; then
 +       DBTYPE="freetds"
 +    else
@@ -311,29 +295,25 @@ diff -u -r1.160 configure
 +
 +else
 +  
-+	echo "$ac_t""no" 1>&6
++    echo "$ac_t""no" 1>&6
 +
 +fi
-+
-+
-+
-+
+ 
  
  # Check whether --with-wtls or --without-wtls was given.
- if test "${with_wtls+set}" = set; then
 Index: configure.in
 ===================================================================
 RCS file: /home/cvs/gateway/configure.in,v
 retrieving revision 1.166
 diff -u -r1.166 configure.in
---- configure.in	23 Mar 2006 18:32:34 -0000	1.166
-+++ configure.in	30 May 2006 17:44:18 -0000
-@@ -913,14 +913,14 @@
+--- configure.in.orig   2006-06-13 15:27:52.000000000 -0600
++++ configure.in        2006-06-13 15:27:15.000000000 -0600
+@@ -936,14 +936,14 @@
          dnl mysql-4.x style
          MYSQL_LIBS=""
          if $MYSQL_CONFIG --libs_r &>/dev/null ; then
 -            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r`
-+ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/\x27//g"`
++            MYSQL_LIBS=`$MYSQL_CONFIG --libs_r | sed -e "s/\x27//g"`
              AC_MSG_CHECKING([mysql reentrant libs])
              AC_MSG_RESULT([$MYSQL_LIBS])
              AC_CHECK_LIB(mysqlclient_r, mysql_init, [ LIBS="$LIBS $MYSQL_LIBS" ],
@@ -341,39 +321,39 @@ diff -u -r1.166 configure.in
          fi
          if test -z "$MYSQL_LIBS" ; then
 -            MYSQL_LIBS=`$MYSQL_CONFIG --libs`
-+ 	    MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/\x27//g"`
++            MYSQL_LIBS=`$MYSQL_CONFIG --libs | sed -e "s/\x27//g"`
              AC_MSG_CHECKING([mysql libs])
              AC_MSG_RESULT([$MYSQL_LIBS])
              AC_CHECK_LIB(mysqlclient, mysql_init, [ LIBS="$LIBS $MYSQL_LIBS" ],
-@@ -1170,6 +1170,80 @@
- 
- 
- 
+@@ -1003,6 +1003,79 @@
+   AC_MSG_RESULT(disabled)
+ ])
+
 +AC_MSG_CHECKING(for Ct-Lib support)
 +AC_ARG_WITH(ctlib,
 +[  --with-ctlib[=DIR]      Include Ct-Lib support.  DIR is the Ct-Lib
 +                          install directory, defaults to /opt/sybase.],
 +[
-+	if test "$withval" = "yes"; then
-+		withval=/opt/sybase
-+	fi
++    if test "$withval" = "yes"; then
++        withval=/opt/sybase
++    fi
 +
-+	if test "$withval" != "no"; then
-+		if test -f $withval/include/ctpublic.h; then
-+			CTLIB_INCDIR=$withval/include
-+			CTLIB_LIBDIR=$withval/lib
-+		else
-+    			AC_MSG_RESULT(no)
-+			AC_MSG_ERROR(Invalid Ct-Lib directory - unable to find ctpublic.h)
-+		fi
-+		CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct -lcs -lsybtcl -lcomn -lintl"
-+		CTLIB_INCLUDE="-I$CTLIB_INCDIR"
-+		AC_DEFINE(HAVE_CTLIB)
-+		AC_MSG_RESULT(yes)
-+		have_db=yes
-+		dnl ctlib requires -ldl sometime
-+		AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen, CTLIB_LFLAGS="$CTLIB_LFLAGS -ldl"))
-+	fi
++    if test "$withval" != "no"; then
++        if test -f $withval/include/ctpublic.h; then
++            CTLIB_INCDIR=$withval/include
++            CTLIB_LIBDIR=$withval/lib
++        else
++                AC_MSG_RESULT(no)
++            AC_MSG_ERROR(Invalid Ct-Lib directory - unable to find ctpublic.h)
++        fi
++        CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct -lcs -lsybtcl -lcomn -lintl"
++        CTLIB_INCLUDE="-I$CTLIB_INCDIR"
++        AC_DEFINE(HAVE_CTLIB)
++        AC_MSG_RESULT(yes)
++        have_db=yes
++        dnl ctlib requires -ldl sometime
++        AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen, CTLIB_LFLAGS="$CTLIB_LFLAGS -ldl"))
++    fi
 +    if test "x$DBTYPE" = "x" ; then
 +       DBTYPE="ctlib"
 +    else
@@ -381,7 +361,7 @@ diff -u -r1.166 configure.in
 +    fi
 +
 +],[
-+	AC_MSG_RESULT(no)
++    AC_MSG_RESULT(no)
 +])
 +AC_SUBST(CTLIB_LFLAGS)
 +AC_SUBST(CTLIB_INCLUDE)
@@ -392,25 +372,25 @@ diff -u -r1.166 configure.in
 +[  --with-freetds[=DIR]    Include FreeTDS Ct-Lib support.  DIR is the FreeTDS
 +                          install directory, defaults to /usr/local.],
 +[
-+	if test "$withval" = "yes"; then
-+		withval=/usr/local
-+	fi
++    if test "$withval" = "yes"; then
++        withval=/usr/local
++    fi
 +
-+	if test "$withval" != "no"; then
-+		if test -f $withval/include/ctpublic.h; then
-+			CTLIB_INCDIR=$withval/include
-+			CTLIB_LIBDIR=$withval/lib
-+		else
-+    			AC_MSG_RESULT(no)
-+			AC_MSG_ERROR(Invalid FreeTDS directory - unable to find ctpublic.h)
-+		fi
-+		CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct"
-+		CTLIB_INCLUDE="-I$CTLIB_INCDIR"
-+		AC_DEFINE(HAVE_CTLIB)
-+		AC_MSG_RESULT(yes)
-+		have_db=yes
-+		AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen, CTLIB_LFLAGS="$CTLIB_LFLAGS -ldl"))
-+	fi
++    if test "$withval" != "no"; then
++        if test -f $withval/include/ctpublic.h; then
++            CTLIB_INCDIR=$withval/include
++            CTLIB_LIBDIR=$withval/lib
++        else
++                AC_MSG_RESULT(no)
++            AC_MSG_ERROR(Invalid FreeTDS directory - unable to find ctpublic.h)
++        fi
++        CTLIB_LFLAGS="-L$CTLIB_LIBDIR -lct"
++        CTLIB_INCLUDE="-I$CTLIB_INCDIR"
++        AC_DEFINE(HAVE_CTLIB)
++        AC_MSG_RESULT(yes)
++        have_db=yes
++        AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen, CTLIB_LFLAGS="$CTLIB_LFLAGS -ldl"))
++    fi
 +    if test "x$DBTYPE" = "x" ; then
 +       DBTYPE="freetds"
 +    else
@@ -418,21 +398,20 @@ diff -u -r1.166 configure.in
 +    fi
 +
 +],[
-+	AC_MSG_RESULT(no)
++    AC_MSG_RESULT(no)
 +])
 +AC_SUBST(CTLIB_LFLAGS)
 +AC_SUBST(CTLIB_INCLUDE)
-+
- dnl Implement the --with-wtls option.
- dnl Check to see if we should include WTLS support, and which library to use.
- 
+
+ dnl Implement the --with-sqlite option. This will set HAVE_SQLITE in gw-config.h
+ dnl accordingly and enable the usage of the libsqlite routines.
 Index: gw/smsbox.c
 ===================================================================
 RCS file: /home/cvs/gateway/gw/smsbox.c,v
 retrieving revision 1.266
 diff -u -r1.266 smsbox.c
---- gw/smsbox.c	15 May 2006 18:24:40 -0000	1.266
-+++ gw/smsbox.c	30 May 2006 17:44:18 -0000
+--- gw/smsbox.c 15 May 2006 18:24:40 -0000  1.266
++++ gw/smsbox.c 30 May 2006 17:44:18 -0000
 @@ -3319,7 +3319,7 @@
      Octstr *http_proxy_password = NULL;
      Octstr *http_proxy_exceptions_regex = NULL;
@@ -444,18 +423,18 @@ diff -u -r1.266 smsbox.c
      bb_ssl = 0;
 @@ -3365,6 +3365,18 @@
      if (grp == NULL)
- 	panic(0, "No 'smsbox' group in configuration");
+    panic(0, "No 'smsbox' group in configuration");
  
 +    if (cfg_get_bool(&bearerbox_is_sqlbox, grp, octstr_imm("bearerbox-is-sqlbox")) == 0) {
-+	if (bearerbox_is_sqlbox) {
-+		grp = cfg_get_single_group(cfg, octstr_imm("sqlbox"));
-+		if (cfg_get_integer(&bb_port, grp, octstr_imm("smsbox-port")) == -1)
-+			panic(0, "Missing or bad 'smsbox-port' in sqlbox group");
++   if (bearerbox_is_sqlbox) {
++       grp = cfg_get_single_group(cfg, octstr_imm("sqlbox"));
++       if (cfg_get_integer(&bb_port, grp, octstr_imm("smsbox-port")) == -1)
++           panic(0, "Missing or bad 'smsbox-port' in sqlbox group");
 +#ifdef HAVE_LIBSSL
-+		cfg_get_bool(&bb_ssl, grp, octstr_imm("smsbox-port-ssl"));
++       cfg_get_bool(&bb_ssl, grp, octstr_imm("smsbox-port-ssl"));
 +#endif /* HAVE_LIBSSL */
-+		grp = cfg_get_single_group(cfg, octstr_imm("smsbox"));
-+	}
++       grp = cfg_get_single_group(cfg, octstr_imm("smsbox"));
++   }
 +    }
 +
      smsbox_id = cfg_get(grp, octstr_imm("smsbox-id"));
@@ -466,8 +445,8 @@ Index: gwlib/cfg.def
 RCS file: /home/cvs/gateway/gwlib/cfg.def,v
 retrieving revision 1.118
 diff -u -r1.118 cfg.def
---- gwlib/cfg.def	9 May 2006 14:32:31 -0000	1.118
-+++ gwlib/cfg.def	30 May 2006 17:44:18 -0000
+--- gwlib/cfg.def   9 May 2006 14:32:31 -0000   1.118
++++ gwlib/cfg.def   30 May 2006 17:44:18 -0000
 @@ -243,6 +243,7 @@
  SINGLE_GROUP(smsbox,
      OCTSTR(smsbox-id)
@@ -504,3 +483,4 @@ diff -u -r1.118 cfg.def
  #undef OCTSTR
  #undef SINGLE_GROUP
  #undef MULTI_GROUP
+
