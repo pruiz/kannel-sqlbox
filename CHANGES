@@ -1,3 +1,7 @@
+2006/06/20
+	Postgres SQL driver fixed after a long period of being broken.
+	Many thanks and credits go to Huberto Figuera <hfiguera@gmail.com>
+
 2006/06/14
 	make patch failure fixed by Martin Conte
 
