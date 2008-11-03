@@ -193,6 +193,10 @@ void pgsql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 	Octstr *stuffer[30];
 	int stuffcount = 0;
 
+	// checking if message is unicode and converting the message back to hex values to be able to store in the database
+        if(msg->sms.coding == 2)
+                octstr_binary_to_hex(msg->sms.msgdata,1);
+
 	values = octstr_format("%S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S", st_str(momt), st_str(msg->sms.sender), st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time), st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type), st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress), st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url), st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset), st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
 	sql = octstr_format("INSERT INTO %S (momt, sender, receiver, udhdata, msgdata, time, smsc_id, service, account, sms_type, mclass, mwi, coding, compress, validity, deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo) VALUES (%S)", sqlbox_logtable, values);
 	sql_update(sql);

@@ -1,7 +1,7 @@
 #ifndef SQLBOX_SQL_H
 #define SQLBOX_SQL_H
 #include "gwlib/gwlib.h"
-#include "msg.h"
+#include "gw/msg.h"
 #include "sqlbox_mysql.h"
 #include "sqlbox_pgsql.h"
 //#include "sqlbox_mssql.h"

@@ -65,9 +65,9 @@
 
 #include "gwlib/gwlib.h"
 #include "gwlib/dbpool.h"
-#include "msg.h"
-#include "shared.h"
-#include "bb.h"
+#include "gw/msg.h"
+#include "gw/shared.h"
+#include "gw/bb.h"
 #include "sqlbox_sql.h"
 
 /* our config */
@@ -106,6 +106,53 @@ typedef struct _boxc {
     volatile sig_atomic_t alive;
     Octstr *boxc_id; /* identifies the connected smsbox instance */
 } Boxc;
+
+/*
+ * Adding hooks to kannel check config
+ *
+ * Martin Conte.
+ */
+
+static int sqlbox_is_allowed_in_group(Octstr *group, Octstr *variable)
+{
+    Octstr *groupstr;
+
+    groupstr = octstr_imm("group");
+
+    #define OCTSTR(name) \
+        if (octstr_compare(octstr_imm(#name), variable) == 0) \
+        return 1;
+    #define SINGLE_GROUP(name, fields) \
+        if (octstr_compare(octstr_imm(#name), group) == 0) { \
+        if (octstr_compare(groupstr, variable) == 0) \
+        return 1; \
+        fields \
+        return 0; \
+    }
+    #define MULTI_GROUP(name, fields) \
+        if (octstr_compare(octstr_imm(#name), group) == 0) { \
+        if (octstr_compare(groupstr, variable) == 0) \
+        return 1; \
+        fields \
+        return 0; \
+    }
+    #include "sqlbox-cfg.def"
+
+    return 0;
+}
+
+static int sqlbox_is_single_group(Octstr *query)
+{
+    #define OCTSTR(name)
+    #define SINGLE_GROUP(name, fields) \
+        if (octstr_compare(octstr_imm(#name), query) == 0) \
+        return 1;
+    #define MULTI_GROUP(name, fields) \
+        if (octstr_compare(octstr_imm(#name), query) == 0) \
+        return 0;
+    #include "sqlbox-cfg.def"
+    return 0;
+}
 
 /*
  *-------------------------------------------------
@@ -174,6 +221,12 @@ static Msg *read_from_box(Connection *conn, Boxc *boxconn)
 static int send_msg(Connection *conn, Boxc *boxconn, Msg *pmsg)
 {
     Octstr *pack;
+
+    // checking if the message is unicode and converting it to binary for submitting	
+    if(pmsg->sms.coding == 2)
+	octstr_hex_to_binary(pmsg->sms.msgdata);
+
+
 
     pack = msg_pack(pmsg);
 
@@ -600,7 +653,6 @@ static void init_sqlbox(Cfg *cfg)
 
 	/* some default values */
 	sqlbox_port_ssl = 0;
-	bearerbox_host = octstr_create(BB_DEFAULT_HOST);
 	bearerbox_port = BB_DEFAULT_SMSBOX_PORT;
 	bearerbox_port_ssl = 0;
 	logfile = NULL;
@@ -611,10 +663,9 @@ static void init_sqlbox(Cfg *cfg)
 	 * core group in configuration file
 	*/
 
-	grp = cfg_get_single_group(cfg, octstr_imm("core"));
-    
-	if (cfg_get_integer(&bearerbox_port, grp, octstr_imm("smsbox-port")) == -1)
-		panic(0, "Missing or bad 'smsbox-port' in core group");
+	grp = cfg_get_single_group(cfg, octstr_imm("sqlbox"));
+	if (cfg_get_integer(&bearerbox_port, grp, octstr_imm("bearerbox-port")) == -1)
+		panic(0, "Missing or bad 'bearerbox-port' in sqlbox group");
 #ifdef HAVE_LIBSSL
 	cfg_get_bool(&bearerbox_port_ssl, grp, octstr_imm("smsbox-port-ssl"));
 	conn_config_ssl(grp);
@@ -623,6 +674,10 @@ static void init_sqlbox(Cfg *cfg)
 	grp = cfg_get_single_group(cfg, octstr_imm("sqlbox"));
 	if (grp == NULL)
 		panic(0, "No 'sqlbox' group in configuration");
+
+    bearerbox_host = cfg_get( grp, octstr_imm("bearerbox-host"));
+    if (bearerbox_host == NULL)
+        bearerbox_host = octstr_create(BB_DEFAULT_HOST);
 
 	sqlbox_id = cfg_get(grp, octstr_imm("smsbox-id"));
 	global_sender = cfg_get(grp, octstr_imm("global-sender"));
@@ -675,6 +730,10 @@ int main(int argc, char **argv)
 		filename = octstr_create(argv[cf_index]);
 
 	cfg = cfg_create(filename);
+
+	/* Adding cfg-checks to core */
+
+	cfg_add_hooks(sqlbox_is_allowed_in_group, sqlbox_is_single_group);
 
 	if (cfg_read(cfg) == -1)
 		panic(0, "Couldn't read configuration from `%s'.", octstr_get_cstr(filename));

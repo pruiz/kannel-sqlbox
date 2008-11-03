@@ -1,0 +1,28 @@
+group = sqlbox
+id = sqlbox-db
+smsbox-id = smsbox
+#global-sender = ""
+bearerbox-host = localhost
+bearerbox-port = 13001
+smsbox-port = 13005
+smsbox-port-ssl = false
+sql-log-table = sent_sms
+sql-insert-table = send_sms
+log-file = "/var/log/kannel/kannel-sqlbox.log"
+log-level = 0
+#white-list = ""
+#black-list = ""
+#white-list-regex = ""
+#ssl-client-certkey-file = ""
+#ssl-server-cert-file = ""
+#ssl-server-key-file = ""
+#ssl-trusted-ca-file = ""
+
+group = mysql-connection
+id = sqlbox-db
+host = localhost
+username = root
+password = ""
+database = Delivery
+max-connections = 10
+

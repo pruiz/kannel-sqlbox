@@ -1,6 +1,6 @@
 #include "gwlib/gwlib.h"
 #ifdef HAVE_MYSQL
-#include "msg.h"
+#include "gw/msg.h"
 #include "sqlbox_sql.h"
 void sql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */);
 Msg *mysql_fetch_msg();

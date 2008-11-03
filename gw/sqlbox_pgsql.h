@@ -1,6 +1,6 @@
 #include "gwlib/gwlib.h"
 #ifdef HAVE_PGSQL
-#include "msg.h"
+#include "gw/msg.h"
 #include "sqlbox_sql.h"
 #define sql_fetch_msg pgsql_fetch_msg
 #define sql_save_msg pgsql_save_msg
