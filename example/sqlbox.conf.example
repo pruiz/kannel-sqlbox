@@ -10,9 +10,6 @@ sql-log-table = sent_sms
 sql-insert-table = send_sms
 log-file = "/var/log/kannel/kannel-sqlbox.log"
 log-level = 0
-#white-list = ""
-#black-list = ""
-#white-list-regex = ""
 #ssl-client-certkey-file = ""
 #ssl-server-cert-file = ""
 #ssl-server-key-file = ""
@@ -23,6 +20,6 @@ id = sqlbox-db
 host = localhost
 username = root
 password = ""
-database = Delivery
+database = kannel
 max-connections = 10
 
