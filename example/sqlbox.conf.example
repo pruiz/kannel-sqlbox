@@ -1,6 +1,6 @@
 group = sqlbox
 id = sqlbox-db
-smsbox-id = smsbox
+smsbox-id = sqlbox
 #global-sender = ""
 bearerbox-host = localhost
 bearerbox-port = 13001

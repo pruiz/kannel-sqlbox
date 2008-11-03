@@ -20,3 +20,11 @@ AC_DEFUN(AC_CVS_DATE,
   year=`echo $cvs_date | cut -f5 -d' '`
   $1="$year$month$day"
 ])
+
+AC_DEFUN(AC_CONFIG_SECTION,
+[
+  nl='
+'
+  echo "${nl}${T_MD}$1 ...${T_ME}"
+])
+

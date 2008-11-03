@@ -1,4 +1,6 @@
 2008/11/03
+	Added documentation into the build process.
+2008/11/03
 	Unified CVS and Standalone versions into CVS. Alejandro Guerrieri <aguerrieri at kannel dot org>
 2006/11/06
 	Unicode support. Many thanks to Cavit Dolgun <c.dolgun@gmail.com>
