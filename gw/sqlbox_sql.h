@@ -3,8 +3,13 @@
 #include "gwlib/gwlib.h"
 #include "gw/msg.h"
 #include "sqlbox_mysql.h"
+#include "sqlbox_oracle.h"
 #include "sqlbox_pgsql.h"
+#include "sqlbox_sqlite.h"
+#include "sqlbox_sqlite3.h"
 //#include "sqlbox_mssql.h"
+
+#define SQLBOX_TRACE 0
 
 struct server_type {
 	Octstr *type;

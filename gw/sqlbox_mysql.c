@@ -159,7 +159,6 @@ Msg *mysql_fetch_msg()
 		mysql_free_result(res);
 	}
 	octstr_destroy(sql);
-        //debug("sqlbox", 0, "sql_fetch_msg: %s", octstr_get_cstr(sql));
 	return msg;
 }
 

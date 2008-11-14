@@ -90,7 +90,13 @@ static Octstr *global_sender;
 #ifndef HAVE_MYSQL
 #ifndef HAVE_PGSQL
 #ifndef HAVE_MSSQL
-#error MYSQL or Postgres SQL support needed for SQLBOX
+#ifndef HAVE_SQLITE
+#ifndef HAVE_SQLITE3
+#ifndef HAVE_ORACLE
+#error You need support for at least one DB engine. Please recompile Kannel.
+#endif
+#endif
+#endif
 #endif
 #endif
 #endif
@@ -253,7 +259,7 @@ static void smsbox_to_bearerbox(void *arg)
 
         //list_consume(suspended);	/* block here if suspended */
 
-	msg = read_from_box(conn->smsbox_connection, conn);
+    	msg = read_from_box(conn->smsbox_connection, conn);
 
         if (msg == NULL) {	/* garbage/connection lost */
             conn->alive = 0;
@@ -708,8 +714,9 @@ static void init_sqlbox(Cfg *cfg)
 static int check_args(int i, int argc, char **argv) {
     if (strcmp(argv[i], "-H")==0 || strcmp(argv[i], "--tryhttp")==0) {
 	//only_try_http = 1;
-    } else
-	return -1;
+    } else {
+    	return -1;
+    }
 
     return 0;
 } 

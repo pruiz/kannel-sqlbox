@@ -11,8 +11,26 @@ struct server_type *sqlbox_init_sql(Cfg *cfg)
 		return res;
 	}
 #endif
+#ifdef HAVE_ORACLE
+	res = (struct server_type *)sqlbox_init_oracle(cfg);
+	if (res) {
+		return res;
+	}
+#endif
 #ifdef HAVE_PGSQL
 	res = (struct server_type *)sqlbox_init_pgsql(cfg);
+	if (res) {
+		return res;
+	}
+#endif
+#ifdef HAVE_SQLITE
+	res = (struct server_type *)sqlbox_init_sqlite(cfg);
+	if (res) {
+		return res;
+	}
+#endif
+#ifdef HAVE_SQLITE3
+	res = (struct server_type *)sqlbox_init_sqlite3(cfg);
 	if (res) {
 		return res;
 	}

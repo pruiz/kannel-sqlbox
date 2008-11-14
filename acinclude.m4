@@ -1,4 +1,4 @@
-AC_DEFUN(AC_CVS_DATE,
+AC_DEFUN([AC_CVS_DATE],
 [
   cvs_date=`grep ChangeLog CVS/Entries | cut -f4 -d/`
   day=`grep ChangeLog CVS/Entries | cut -f4 -d/ | cut -c9-10 | tr " " "0"`
@@ -21,7 +21,7 @@ AC_DEFUN(AC_CVS_DATE,
   $1="$year$month$day"
 ])
 
-AC_DEFUN(AC_CONFIG_SECTION,
+AC_DEFUN([AC_CONFIG_SECTION],
 [
   nl='
 '

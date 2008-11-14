@@ -1,8 +1,10 @@
 dnl SqlBox - Open Source Kannel Extension for store messages
 dnl
-dnl Rene Kluwen <rene.kluwen@chimit.cl>
+dnl Rene Kluwen <rene dot kluwen at chimit dot nl>
 dnl 
-dnl Stand alone module by Mart�n Conte <Reflejo@gmail.com>
+dnl Stand alone module by Martin Conte <reflejo at gmail dot com>
+dnl 
+dnl Documentation and additional patches by Alejandro Guerrieri <aguerrieri at kannel dot org>
 dnl 
 dnl This program is free software, distributed under the terms of
 dnl the GNU General Public License, with a few exceptions granted (see LICENSE)
@@ -73,7 +75,8 @@ case "$host" in
     EXE_EXT=".exe"
     ;;
   *apple-darwin*) 
-    CFLAGS="$CFLAGS -DDARWIN=1" 
+    CFLAGS="$CFLAGS -DDARWIN=1"
+    LIBS="$LIBS -L/opt/local/lib" 
     ;;
   *-linux-*)
     CFLAGS="$CFLAGS -D_XOPEN_SOURCE=600 -D_BSD_SOURCE"
@@ -431,5 +434,3 @@ AC_CHECK_LIB([gwlib], [cfg_create], [], AC_MSG_ERROR([Kannel gwlib is required!]
 AC_CONFIG_FILES([Makefile gw/Makefile])
 
 AC_OUTPUT
-
-
