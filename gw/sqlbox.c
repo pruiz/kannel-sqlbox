@@ -87,13 +87,15 @@ static Octstr *box_allow_ip;
 static Octstr *box_deny_ip;
 static Octstr *global_sender;
 
+#ifndef HAVE_MSSQL
 #ifndef HAVE_MYSQL
 #ifndef HAVE_PGSQL
-#ifndef HAVE_MSSQL
+#ifndef HAVE_SDB
 #ifndef HAVE_SQLITE
 #ifndef HAVE_SQLITE3
 #ifndef HAVE_ORACLE
 #error You need support for at least one DB engine. Please recompile Kannel.
+#endif
 #endif
 #endif
 #endif

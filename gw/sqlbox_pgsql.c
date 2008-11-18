@@ -84,8 +84,8 @@ static void pgsql_update(const Octstr *sql)
     PGresult *res;
     ExecStatusType status;
 
-#if defined(DLR_TRACE)
-     debug("dlr.pgsql", 0, "sql: %s", octstr_get_cstr(sql));
+#if defined(SQLBOX_TRACE)
+     debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 
     pc = dbpool_conn_consume(pool);
@@ -113,8 +113,8 @@ static PGresult *pgsql_select(const Octstr *sql)
     PGresult *res = NULL;
     DBPoolConn *pc;
 
-#if defined(DLR_TRACE)
-    debug("dlr.pgsql", 0, "sql: %s", octstr_get_cstr(sql));
+#if defined(SQLBOX_TRACE)
+    debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 
     pc = dbpool_conn_consume(pool);
@@ -154,10 +154,10 @@ void sqlbox_configure_pgsql(Cfg* cfg)
 	}
 
 	/* create send_sms && sent_sms tables if they do not exist */
-	sql = octstr_format("CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, momt VARCHAR(3) CHECK(momt IN ('MO', 'MT', 'DLR', NULL)) DEFAULT NULL, sender VARCHAR(20) NULL, receiver VARCHAR(20) NULL, udhdata VARCHAR(255) NULL, msgdata VARCHAR(255) NULL, time BIGINT NULL, smsc_id VARCHAR(255) NULL, service VARCHAR(255) NULL, account VARCHAR(255) NULL, id BIGINT NULL, sms_type BIGINT NULL, mclass BIGINT NULL, mwi BIGINT NULL, coding BIGINT NULL, compress BIGINT NULL, validity BIGINT NULL, deferred BIGINT NULL, dlr_mask BIGINT NULL, dlr_url VARCHAR(255) NULL, pid BIGINT NULL, alt_dcs BIGINT NULL, rpi BIGINT NULL, charset VARCHAR(255) NULL, boxc_id VARCHAR(255) NULL, binfo VARCHAR(255) NULL)", sqlbox_logtable);
+	sql = octstr_format(SQLBOX_PGSQL_CREATE_LOG_TABLE, sqlbox_logtable);
 	sql_update(sql);
 	octstr_destroy(sql);
-	sql = octstr_format("CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, momt VARCHAR(3) CHECK(momt IN ('MO', 'MT', NULL)) DEFAULT NULL, sender VARCHAR(20) NULL, receiver VARCHAR(20) NULL, udhdata VARCHAR(255) NULL, msgdata VARCHAR(255) NULL, time BIGINT NULL, smsc_id VARCHAR(255) NULL, service VARCHAR(255) NULL, account VARCHAR(255) NULL, id BIGINT NULL, sms_type BIGINT NULL, mclass BIGINT NULL, mwi BIGINT NULL, coding BIGINT NULL, compress BIGINT NULL, validity BIGINT NULL, deferred BIGINT NULL, dlr_mask BIGINT NULL, dlr_url VARCHAR(255) NULL, pid BIGINT NULL, alt_dcs BIGINT NULL, rpi BIGINT NULL, charset VARCHAR(255) NULL, boxc_id VARCHAR(255) NULL, binfo VARCHAR(255) NULL)", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_PGSQL_CREATE_INSERT_TABLE, sqlbox_insert_table);
 	sql_update(sql);
 	octstr_destroy(sql);
 	/* end table creation */
@@ -189,7 +189,7 @@ static Octstr *get_string_value_or_return_null(Octstr *str)
 
 void pgsql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 {
-	Octstr *sql, *values;
+	Octstr *sql;
 	Octstr *stuffer[30];
 	int stuffcount = 0;
 
@@ -197,14 +197,18 @@ void pgsql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
         if(msg->sms.coding == 2)
                 octstr_binary_to_hex(msg->sms.msgdata,1);
 
-	values = octstr_format("%S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S", st_str(momt), st_str(msg->sms.sender), st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time), st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type), st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress), st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url), st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset), st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
-	sql = octstr_format("INSERT INTO %S (momt, sender, receiver, udhdata, msgdata, time, smsc_id, service, account, sms_type, mclass, mwi, coding, compress, validity, deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo) VALUES (%S)", sqlbox_logtable, values);
+	sql = octstr_format(SQLBOX_PGSQL_INSERT_QUERY, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender),
+		st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),
+		st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type),
+		st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress),
+		st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url),
+		st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset),
+		st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
 	sql_update(sql);
         //debug("sqlbox", 0, "sql_save_msg: %s", octstr_get_cstr(sql));
 	while (stuffcount > 0) {
 		octstr_destroy(stuffer[--stuffcount]);
 	}
-	octstr_destroy(values);
 	octstr_destroy(sql);
 }
 
@@ -221,7 +225,7 @@ Msg *pgsql_fetch_msg()
 	Octstr *sql, *delet, *id;
 	PGresult *res;
 
-	sql = octstr_format("SELECT sql_id, momt, sender, receiver, udhdata, msgdata, time, smsc_id, service, account, id, sms_type, mclass, mwi, coding, compress, validity, deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo FROM %S LIMIT 1 OFFSET 0", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_PGSQL_SELECT_QUERY, sqlbox_insert_table);
 	res = pgsql_select(sql);
 	if (res == NULL) {
 		debug("sqlbox", 0, "SQL statement failed: %s", octstr_get_cstr(sql));
@@ -261,7 +265,7 @@ Msg *pgsql_fetch_msg()
 				msg->sms.boxc_id= octstr_null_create(24);
 			}
 			/* delete current row */
-			delet = octstr_format("DELETE FROM %S WHERE sql_id = %S", sqlbox_insert_table, id);
+			delet = octstr_format(SQLBOX_PGSQL_DELETE_QUERY, sqlbox_insert_table, id);
         		//debug("sqlbox", 0, "sql_fetch_msg: %s", octstr_get_cstr(delet));
 			pgsql_update(delet);
 			octstr_destroy(id);

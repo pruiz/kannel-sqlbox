@@ -86,10 +86,10 @@ void sqlbox_configure_sqlite3(Cfg* cfg)
     }
 
 	/* create send_sms && sent_sms tables if they do not exist */
-	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id INTEGER PRIMARY KEY AUTOINCREMENT, momt CHAR(3) NULL, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_logtable);
+	sql = octstr_format(SQLBOX_SQLITE3_CREATE_LOG_TABLE, sqlbox_logtable);
 	sql_update(pc, sql);
 	octstr_destroy(sql);
-	sql = octstr_format("CREATE TABLE IF NOT EXISTS %S (sql_id INTEGER PRIMARY KEY AUTOINCREMENT, momt CHAR(3) NULL, sender varchar(20) null, receiver varchar(20) null, udhdata blob null, msgdata text null, time bigint(20) null, smsc_id varchar(255) null, service varchar(255) null, account varchar(255) null, id bigint(20) null, sms_type bigint(20) null, mclass bigint(20) null, mwi bigint(20) null, coding bigint(20) null, compress bigint(20) null, validity bigint(20) null, deferred bigint(20) null, dlr_mask bigint(20) null, dlr_url varchar(255) null, pid bigint(20) null, alt_dcs bigint(20) null, rpi bigint(20) null, charset varchar(255) null, boxc_id varchar(255) null, binfo varchar(255) null)", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_SQLITE3_CREATE_LOG_TABLE, sqlbox_insert_table);
 	sql_update(pc, sql);
 	octstr_destroy(sql);
 	/* end table creation */
@@ -114,7 +114,7 @@ Msg *sqlite3_fetch_msg()
         return;
     }
 
-	sql = octstr_format("SELECT sql_id, momt, sender, receiver, udhdata, msgdata, time, smsc_id, service, account, id, sms_type, mclass, mwi, coding, compress, validity, deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo FROM %S LIMIT 0,1", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_SQLITE3_SELECT_QUERY, sqlbox_insert_table);
 	res = sql_select(pc, sql);
 	do {
 		state=sqlite3_step(res);
@@ -153,7 +153,7 @@ Msg *sqlite3_fetch_msg()
 
 	if ( rows > 0) {
 		/* delete current row */
-		delet = octstr_format("DELETE FROM %S WHERE sql_id = %S", sqlbox_insert_table, id);
+		delet = octstr_format(SQLBOX_SQLITE3_DELETE_QUERY, sqlbox_insert_table, id);
 		sql_update(pc, delet);
 		octstr_destroy(id);
 		octstr_destroy(delet);
@@ -190,7 +190,7 @@ static Octstr *get_string_value_or_return_null(Octstr *str)
 
 void sqlite3_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 {
-	Octstr *sql, *values;
+	Octstr *sql;
 	Octstr *stuffer[30];
 	int stuffcount = 0;
     DBPoolConn *pc;
@@ -205,13 +205,17 @@ void sqlite3_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
         return;
     }
 
-	values = octstr_format("NULL, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S", st_str(momt), st_str(msg->sms.sender), st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time), st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type), st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress), st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url), st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset), st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
-	sql = octstr_format("INSERT INTO %S (sql_id, momt, sender, receiver, udhdata, msgdata, time, smsc_id, service, account, sms_type, mclass, mwi, coding, compress, validity, deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo) VALUES (%S)", sqlbox_logtable, values);
+	sql = octstr_format(SQLBOX_SQLITE3_INSERT_QUERY, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender), 
+		st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),
+		st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type),
+		st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress),
+		st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url),
+		st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset),
+		st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
 	sql_update(pc, sql);
 	while (stuffcount > 0) {
 		octstr_destroy(stuffer[--stuffcount]);
 	}
-	octstr_destroy(values);
 	octstr_destroy(sql);
 	dbpool_conn_produce(pc);
 }

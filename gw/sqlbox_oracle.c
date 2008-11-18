@@ -42,14 +42,14 @@ void sqlbox_configure_oracle(Cfg* cfg)
     }
 
 	/* create send_sms && sent_sms tables if they do not exist */
-	sql = octstr_format("CREATE TABLE \"%S\" (\"sql_id\" INTEGER NOT NULL PRIMARY KEY, \"momt\" VARCHAR2(3) NULL, \"sender\" VARCHAR2(20) NULL, \"receiver\" VARCHAR2(20) NULL, \"udhdata\" VARCHAR2(4000) NULL, \"msgdata\" VARCHAR2(4000) NULL, \"time\" INTEGER NULL, \"smsc_id\" VARCHAR2(255) NULL, \"service\" VARCHAR2(255) NULL, \"account\" VARCHAR2(255) NULL, \"id\" INTEGER NULL, \"sms_type\" INTEGER NULL, \"mclass\" INTEGER NULL, \"mwi\" INTEGER NULL, \"coding\" INTEGER NULL, \"compress\" INTEGER NULL, \"validity\" INTEGER NULL, \"deferred\" INTEGER NULL, \"dlr_mask\" INTEGER NULL, \"dlr_url\" VARCHAR2(255) NULL, \"pid\" INTEGER NULL, \"alt_dcs\" INTEGER NULL, \"rpi\" INTEGER NULL, \"charset\" VARCHAR2(255) NULL, \"boxc_id\" VARCHAR2(255) NULL, \"binfo\" VARCHAR2(255) NULL, CONSTRAINT c_%S_momt CHECK ( \"momt\" IN ( 'MO', 'MT', 'DLR', NULL)))", sqlbox_logtable, sqlbox_logtable);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_LOG_TABLE, sqlbox_logtable, sqlbox_logtable);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 	sql_update(pc, sql, NULL);
 	octstr_destroy(sql);
 
-	sql = octstr_format("CREATE TABLE \"%S\" (\"sql_id\" INTEGER NOT NULL PRIMARY KEY, \"momt\" VARCHAR2(3) NULL, \"sender\" VARCHAR2(20) NULL, \"receiver\" VARCHAR2(20) NULL, \"udhdata\" VARCHAR2(4000) NULL, \"msgdata\" VARCHAR2(4000) NULL, \"time\" INTEGER NULL, \"smsc_id\" VARCHAR2(255) NULL, \"service\" VARCHAR2(255) NULL, \"account\" VARCHAR2(255) NULL, \"id\" INTEGER NULL, \"sms_type\" INTEGER NULL, \"mclass\" INTEGER NULL, \"mwi\" INTEGER NULL, \"coding\" INTEGER NULL, \"compress\" INTEGER NULL, \"validity\" INTEGER NULL, \"deferred\" INTEGER NULL, \"dlr_mask\" INTEGER NULL, \"dlr_url\" VARCHAR2(255) NULL, \"pid\" INTEGER NULL, \"alt_dcs\" INTEGER NULL, \"rpi\" INTEGER NULL, \"charset\" VARCHAR2(255) NULL, \"boxc_id\" VARCHAR2(255) NULL, \"binfo\" VARCHAR2(255) NULL, CONSTRAINT c_%S_momt CHECK ( \"momt\" IN ( 'MO', 'MT', NULL)))", sqlbox_insert_table, sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_INSERT_TABLE, sqlbox_insert_table, sqlbox_insert_table);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
@@ -58,28 +58,28 @@ void sqlbox_configure_oracle(Cfg* cfg)
 	/*
 	 * Oracle implementation using a sequence and a trigger for auto_increment fields.
 	 */
-	sql = octstr_format("CREATE SEQUENCE \"%S_seq\" START WITH 1 INCREMENT BY 1 NOMAXVALUE", sqlbox_logtable);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_LOG_SEQUENCE, sqlbox_logtable);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 	sql_update(pc, sql, NULL);
 	octstr_destroy(sql);
 
-	sql = octstr_format("CREATE SEQUENCE \"%S_seq\" START WITH 1 INCREMENT BY 1 NOMAXVALUE", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_INSERT_SEQUENCE, sqlbox_insert_table);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 	sql_update(pc, sql, NULL);
 	octstr_destroy(sql);
 
-	sql = octstr_format("CREATE TRIGGER \"%S_trg\" BEFORE INSERT ON \"%S\" FOR EACH ROW BEGIN SELECT \"%S_seq\".nextval INTO :new.\"sql_id\" FROM DUAL; END;", sqlbox_logtable, sqlbox_logtable, sqlbox_logtable);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_LOG_TRIGGER, sqlbox_logtable, sqlbox_logtable, sqlbox_logtable);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
 	sql_update(pc, sql, NULL);
 	octstr_destroy(sql);
 
-	sql = octstr_format("CREATE TRIGGER \"%S_trg\" BEFORE INSERT ON \"%S\" FOR EACH ROW BEGIN SELECT \"%S_seq\".nextval INTO :new.\"sql_id\" FROM DUAL; END;", sqlbox_insert_table, sqlbox_insert_table, sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_ORACLE_CREATE_INSERT_TRIGGER, sqlbox_insert_table, sqlbox_insert_table, sqlbox_insert_table);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
@@ -109,7 +109,7 @@ Msg *oracle_fetch_msg()
         return;
     }
 
-	sql = octstr_format("SELECT \"sql_id\", \"momt\", \"sender\", \"receiver\", \"udhdata\", \"msgdata\", \"time\", \"smsc_id\", \"service\", \"account\", \"id\", \"sms_type\", \"mclass\", \"mwi\", \"coding\", \"compress\", \"validity\", \"deferred\", \"dlr_mask\", \"dlr_url\", \"pid\", \"alt_dcs\", \"rpi\", \"charset\", \"boxc_id\", \"binfo\" FROM \"%S\" WHERE ROWNUM = 1", sqlbox_insert_table);
+	sql = octstr_format(SQLBOX_ORACLE_SELECT_QUERY, sqlbox_insert_table);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
@@ -151,7 +151,7 @@ Msg *oracle_fetch_msg()
 				msg->sms.boxc_id= get_oracle_octstr_col(24);
 			}
 			/* delete current row */
-			delet = octstr_format("DELETE FROM \"%S\" WHERE \"sql_id\" = %S", sqlbox_insert_table, id);
+			delet = octstr_format(SQLBOX_ORACLE_DELETE_QUERY, sqlbox_insert_table, id);
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
@@ -193,7 +193,7 @@ static Octstr *get_string_value_or_return_null(Octstr *str)
 
 void oracle_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 {
-	Octstr *sql, *values;
+	Octstr *sql;
 	Octstr *stuffer[30];
 	int stuffcount = 0;
     DBPoolConn *pc;
@@ -206,8 +206,13 @@ void oracle_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 	if(msg->sms.coding == 2)
          	octstr_binary_to_hex(msg->sms.msgdata,1);
 
-	values = octstr_format("%S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S", st_str(momt), st_str(msg->sms.sender), st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time), st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type), st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress), st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url), st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset), st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
-	sql = octstr_format("INSERT INTO \"%S\" (\"momt\", \"sender\", \"receiver\", \"udhdata\", \"msgdata\", \"time\", \"smsc_id\", \"service\", \"account\", \"sms_type\", \"mclass\", \"mwi\", \"coding\", \"compress\", \"validity\", \"deferred\", \"dlr_mask\", \"dlr_url\", \"pid\", \"alt_dcs\", \"rpi\", \"charset\", \"boxc_id\", \"binfo\") VALUES (%S)", sqlbox_logtable, values);
+	sql = octstr_format(SQLBOX_ORACLE_INSERT_QUERY, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender),
+		st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),
+		st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type),
+		st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress),
+		st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url),
+		st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset),
+		st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
 #if defined(SQLBOX_TRACE)
      debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(sql));
 #endif
@@ -216,7 +221,6 @@ void oracle_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
 		octstr_destroy(stuffer[--stuffcount]);
 	}
 	dbpool_conn_produce(pc);
-	octstr_destroy(values);
 	octstr_destroy(sql);
 }
 

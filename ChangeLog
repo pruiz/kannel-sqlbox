@@ -1,10 +1,15 @@
-2008/11/12
-  - Added support for Oracle, SQLite2 and SQLite 3. Alejandro Guerrieri <aguerrieri at kannel dot org>
-  - Binary now install under sbin instead of bin, just like all the other Kannel "boxes". Alejandro Guerrieri <aguerrieri at kannel dot org>
+2008/11/18 - 0.7.1 [CVS Tag: rev-0-7-1] - Alejandro Guerrieri <aguerrieri at kannel dot org>
+	- Added support for the LibSDB database abstraction library. DB support is now similar to Kannel's.
+	- Extensive code reorganization to move the queries into the header files and allow reusing from the libsdb module.
+	- Added examples for database connections on sample conf file.
 
-2008/11/03
-	- Added documentation into the build process. Alejandro Guerrieri <aguerrieri at kannel dot org>
-	- Unified CVS and Standalone versions into CVS. Alejandro Guerrieri <aguerrieri at kannel dot org>
+2008/11/12 - 0.7.0 [CVS Tag: rev-0-7-0] - Alejandro Guerrieri <aguerrieri at kannel dot org>
+	- Added support for Oracle, SQLite2 and SQLite 3.
+	- Binary now install under sbin instead of bin, just like all the other Kannel "boxes".
+
+2008/11/03 - 0.6.0 [CVS Tag: rev-0-6-0] - Alejandro Guerrieri <aguerrieri at kannel dot org>
+	- Added documentation into the build process.
+	- Unified CVS and Standalone versions into CVS.
 
 2006/11/06
 	Unicode support. Many thanks to Cavit Dolgun <c dot dolgun at gmail dot com>
