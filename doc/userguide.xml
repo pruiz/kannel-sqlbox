@@ -163,8 +163,8 @@
 			<title>Getting the source code</title>
 			<para>
 				The source code to Sqlbox is available for download at
-				<ulink url="http://www.kannel.org/download.shtml">http://www.kannel.org/download.shtml</ulink>
-				. It is available in various formats and you can choose to download
+				<ulink url="http://www.kannel.org/~aguerrieri/">http://www.kannel.org/~aguerrieri/</ulink>.
+				It is available in various formats and you can choose to download
 				either the latest release version or the daily snapshot of the
 				development source tree for the next release version, depending on
 				whether you want to use Sqlbox for production use or to participate
@@ -172,8 +172,8 @@
 			</para>
 			<para>If you're serious about development, you probably want to use
 				CVS, the version control system used by the Kannel project. This
-				allows you to participate in Kannel development much more easily
-				than by downloading the current daily snapshot and integrating any
+				allows you to participate in Sqlbox development much more easily
+				than by downloading the latest release and integrating any
 				changes you've made every day. CVS does that for you. (See the
 				Kannel web site for more information on how to use CVS.)</para>
 		</sect1>
@@ -623,85 +623,84 @@ log-level = 0
       <para><literal>sqlbox</literal> needs a connection to a supported DB engine to operate.
       This connection is established at startup time and kept open until the box stops.</para>
       
-      <para>At the moment, <literal>sqlbox</literal> only supports MySQL and PostgreSQL, with
-      support for other engines being planned.</para>
+      <para>At the moment, <literal>sqlbox</literal> supports MySQL, Oracle, PostgreSQL, LibSDB,
+      Sqlite2 and Sqlite3, though only MySQL and PostgreSQL are tested enough to be considered stable.</para>
       
       <para>The process of configuring a DB connection is simple: You need to create a
       <literal>[engine]-connection</literal> section (where [engine] is the DB engine name, either
-      mysql or pgsql) and indicate a few parameters needed to establish the DB connection.</para>
-      <sect2>
-      <title>Database Connection Configuration</title>
-			 <table frame="none">
-			  <title>Sqlbox Database connection configuration variables</title>
-			  <tgroup cols="3">
-			  <thead>
-			   <row>
-			     <entry>Variable</entry>
-			     <entry>Value</entry>
-			     <entry>Description</entry>
-			   </row>
-			  </thead>
-			  <tbody>
-			   <row><entry><literal>group</literal></entry>
-			     <entry><literal>mysql-connection</literal></entry>
-			     <entry valign="bottom">
-			       This is a mandatory variable if we're connecting to a MySQL database.
-			     </entry>
-			   </row>
-			
-         <row><entry><literal>group</literal></entry>
-			     <entry><literal>pgsql-connection</literal></entry>
-			     <entry valign="bottom">
-			       This is a mandatory variable if we're connecting to a PostgreSQL database. 
-			     </entry></row>
-			
-			   <row><entry><literal>id (m)</literal></entry>
-			     <entry><literal>string</literal></entry>
-			     <entry valign="bottom">
-			       An id to identify which external connection should be used for
-			      Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
-			      problems, so avoid it and any other special non-alphabet characters.
-			     </entry></row>
-			
-			   <row><entry><literal>host (m)</literal></entry>
-			     <entry><literal>string</literal></entry>
-			     <entry valign="bottom">
-			        The hostname where the DB engine is running.
-			     </entry></row>
-			
-			   <row><entry><literal>username (m)</literal></entry>
-			     <entry><literal>string</literal></entry>
-			     <entry valign="bottom">
-			        The username used to connect to the DB engine.
-			     </entry></row>
-			
-			   <row><entry><literal>password (m)</literal></entry>
-			     <entry><literal>string</literal></entry>
-			     <entry valign="bottom">
-			        The password used to connect to the DB engine.
-			     </entry></row>
-			
-			   <row><entry><literal>database (m)</literal></entry>
-			     <entry><literal>string</literal></entry>
-			     <entry valign="bottom">
-			        The database name to use to store the data.
-			     </entry></row>
-			
-			   <row><entry><literal>max-connections</literal></entry>
-			     <entry><literal>number</literal></entry>
-			     <entry valign="bottom">
-			        Create a pool with this number of connections open.
-			     </entry></row>
-			
-			  </tbody>
-			  </tgroup>
-			 </table>
-      </sect2>
+      mysql, oracle, pgsql, sdb, sqlite or sqlite3) and indicate a few parameters needed to
+      establish the DB connection.</para>
       <sect2>
         <title>MySQL Storage</title>
         <para>Uses a MySQL database to store the data. You need to specify the <literal>mysql-connection</literal>
         group.</para>
-        <para>Here is an example configuration:</para>
+        <table frame="none">
+	        <title>MySql Database connection configuration variables</title>
+	        <tgroup cols="3">
+		        <thead>
+		         <row>
+		           <entry>Variable</entry>
+		           <entry>Value</entry>
+		           <entry>Description</entry>
+		         </row>
+		        </thead>
+		        <tbody>
+		         <row><entry><literal>group</literal></entry>
+		           <entry><literal>mysql-connection (m)</literal></entry>
+		           <entry valign="bottom">
+		             This is a mandatory variable.
+		           </entry>
+		         </row>
+
+		         <row><entry><literal>id (m)</literal></entry>
+		           <entry><literal>string</literal></entry>
+		           <entry valign="bottom">
+		             An id to identify which external connection should be used for
+		            Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+		            problems, so avoid it and any other special non-alphabet characters.
+		           </entry></row>
+
+		         <row><entry><literal>host (m)</literal></entry>
+		           <entry><literal>string</literal></entry>
+		           <entry valign="bottom">
+		              The hostname where the MySQL engine is running.
+		           </entry></row>
+
+             <row><entry><literal>port</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  The port where the MySQL engine is running.
+               </entry></row>
+
+		         <row><entry><literal>username (m)</literal></entry>
+		           <entry><literal>string</literal></entry>
+		           <entry valign="bottom">
+		              The username used to connect to the MySQL engine.
+		           </entry></row>
+
+		         <row><entry><literal>password (m)</literal></entry>
+		           <entry><literal>string</literal></entry>
+		           <entry valign="bottom">
+		              The password used to connect to the MySQL engine.
+		           </entry></row>
+
+		         <row><entry><literal>database (m)</literal></entry>
+		           <entry><literal>string</literal></entry>
+		           <entry valign="bottom">
+		              The database name to use to store the data.
+		           </entry></row>
+
+		         <row><entry><literal>max-connections</literal></entry>
+		           <entry><literal>number</literal></entry>
+		           <entry valign="bottom">
+		              Create a pool with this number of connections open.
+		           </entry></row>
+
+		        </tbody>
+	        </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
 
 <programlisting>
 group = mysql-connection
@@ -714,10 +713,138 @@ max-connections = 1
 </programlisting>
       </sect2>
       <sect2>
+        <title>Oracle Storage</title>
+        <para>Uses an Oracle database to store the data. You need to specify the <literal>oracle-connection</literal>
+        group.</para>
+        <table frame="none">
+          <title>Oracle Database connection configuration variables</title>
+          <tgroup cols="3">
+            <thead>
+             <row>
+               <entry>Variable</entry>
+               <entry>Value</entry>
+               <entry>Description</entry>
+             </row>
+            </thead>
+            <tbody>
+             <row><entry><literal>group</literal></entry>
+               <entry><literal>oracle-connection (m)</literal></entry>
+               <entry valign="bottom">
+                 This is a mandatory variable.
+               </entry>
+             </row>
+
+             <row><entry><literal>id (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                 An id to identify which external connection should be used for
+                Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+                problems, so avoid it and any other special non-alphabet characters.
+               </entry></row>
+
+             <row><entry><literal>tnsname (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The tnsname used to connect to the Oracle engine.
+               </entry></row>
+
+             <row><entry><literal>username (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The username used to connect to the Oracle engine.
+               </entry></row>
+
+             <row><entry><literal>password (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The password used to connect to the Oracle engine.
+               </entry></row>
+
+             <row><entry><literal>max-connections</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  Create a pool with this number of connections open.
+               </entry></row>
+
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
+
+<programlisting>
+group = oracle-connection
+tnsname  = //localhost:1521/XE
+username = foo
+password = bar
+max-connections = 1
+</programlisting>
+      </sect2>
+      <sect2>
         <title>PostgreSQL Storage</title>
         <para>Uses a PostgreSQL database to store the data. You need to specify the <literal>pgsql-connection</literal>
         group.</para>
-        <para>Here is an example configuration:</para>
+        <table frame="none">
+          <title>PostgreSQL Database connection configuration variables</title>
+          <tgroup cols="3">
+            <thead>
+             <row>
+               <entry>Variable</entry>
+               <entry>Value</entry>
+               <entry>Description</entry>
+             </row>
+            </thead>
+            <tbody>
+
+             <row><entry><literal>group</literal></entry>
+               <entry><literal>pgsql-connection (m)</literal></entry>
+               <entry valign="bottom">
+                 This is a mandatory variable. 
+               </entry></row>
+
+             <row><entry><literal>id (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                 An id to identify which external connection should be used for
+                Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+                problems, so avoid it and any other special non-alphabet characters.
+               </entry></row>
+
+             <row><entry><literal>host (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The hostname where the PostgreSQL engine is running.
+               </entry></row>
+
+             <row><entry><literal>username (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The username used to connect to the PostgreSQL engine.
+               </entry></row>
+
+             <row><entry><literal>password (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The password used to connect to the PostgreSQL engine.
+               </entry></row>
+
+             <row><entry><literal>database (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The database name to use to store the data.
+               </entry></row>
+
+             <row><entry><literal>max-connections</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  Create a pool with this number of connections open.
+               </entry></row>
+
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
 
 <programlisting>
 group = pgsql-connection
@@ -726,6 +853,193 @@ host = localhost
 username = foo
 password = bar
 database = kannel
+max-connections = 1
+</programlisting>
+      </sect2>
+      <sect2>
+        <title>LibSDB Abstraction Layer</title>
+        <para>Uses the LibSDB database abstraction layer to transparently connect to a database that stores the data.
+        You need to specify the <literal>sdb-connection</literal> group.</para>
+        <table frame="none">
+          <title>LibSDB Database connection configuration variables</title>
+          <tgroup cols="3">
+            <thead>
+             <row>
+               <entry>Variable</entry>
+               <entry>Value</entry>
+               <entry>Description</entry>
+             </row>
+            </thead>
+            <tbody>
+
+             <row><entry><literal>group</literal></entry>
+               <entry><literal>sdb-connection (m)</literal></entry>
+               <entry valign="bottom">
+                 This is a mandatory variable. 
+               </entry></row>
+
+             <row><entry><literal>id (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                 An id to identify which external connection should be used for
+                Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+                problems, so avoid it and any other special non-alphabet characters.
+               </entry></row>
+
+             <row><entry><literal>url (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The LibSDB URL used to connect to the database. See the
+                  <ulink url="http://siag.nu/libsdb/">LibSDB web site</ulink> for information about how
+                  to construct the URL to connect to your particular DB engine.
+               </entry></row>
+
+             <row><entry><literal>max-connections</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  Create a pool with this number of connections open.
+               </entry></row>
+
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
+
+<programlisting>
+group = sdb-connection
+id = sd-sqlbox
+#url = mysql:host=localhost:db=kannel:uid=myuser:pwd=mypass
+#url = sqlite:db=/path/to/kannel.db
+url = sqlite3:db=/path/to/kannel3.db
+max-connections = 1
+</programlisting>
+      </sect2>
+      <sect2>
+        <title>Sqlite 2.x Storage</title>
+        <para>Uses a Sqlite 2.x database to store the data. You need to specify the <literal>sqlite-connection</literal>
+        group.</para>
+        <table frame="none">
+          <title>Sqlite 2.x Database connection configuration variables</title>
+          <tgroup cols="3">
+            <thead>
+             <row>
+               <entry>Variable</entry>
+               <entry>Value</entry>
+               <entry>Description</entry>
+             </row>
+            </thead>
+            <tbody>
+
+             <row><entry><literal>group</literal></entry>
+               <entry><literal>sqlite-connection (m)</literal></entry>
+               <entry valign="bottom">
+                 This is a mandatory variable. 
+               </entry></row>
+
+             <row><entry><literal>id (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                 An id to identify which external connection should be used for
+                Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+                problems, so avoid it and any other special non-alphabet characters.
+               </entry></row>
+
+             <row><entry><literal>database (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The full path to the Sqlite 2.x database file used to store the data. Creates the file if it doesn't exists.
+               </entry></row>
+
+             <row><entry><literal>lock-timeout</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  Time to wait for a lock to free before giving up. You may need to tweak this if you experience lock issues. The
+                  default is to let Sqlite 2.x do it's default behaviour.
+               </entry></row>
+
+             <row><entry><literal>max-connections</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  Create a pool with this number of connections open.
+               </entry></row>
+
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
+
+<programlisting>
+group = sqlite-connection
+id = s2-sqlbox
+host = localhost
+database = /path/to/kannel.db
+lock-timeout = 5
+max-connections = 1
+</programlisting>
+      </sect2>
+      <sect2>
+        <title>Sqlite 3.x Storage</title>
+        <para>Uses a Sqlite 3.x database to store the data. You need to specify the <literal>sqlite3-connection</literal>
+        group.</para>
+        <table frame="none">
+          <title>Sqlite 3.x Database connection configuration variables</title>
+          <tgroup cols="3">
+            <thead>
+             <row>
+               <entry>Variable</entry>
+               <entry>Value</entry>
+               <entry>Description</entry>
+             </row>
+            </thead>
+            <tbody>
+
+             <row><entry><literal>group</literal></entry>
+               <entry><literal>sqlite3-connection (m)</literal></entry>
+               <entry valign="bottom">
+                 This is a mandatory variable. 
+               </entry></row>
+
+             <row><entry><literal>id (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                 An id to identify which external connection should be used for
+                Sqlbox storage. Any string is acceptable, but semicolon ';' may cause
+                problems, so avoid it and any other special non-alphabet characters.
+               </entry></row>
+
+             <row><entry><literal>database (m)</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  The full path to the Sqlite 3.x database file used to store the data. Creates the file if it doesn't exists.
+               </entry></row>
+
+             <row><entry><literal>lock-timeout</literal></entry>
+               <entry><literal>string</literal></entry>
+               <entry valign="bottom">
+                  Time to wait for a lock to free before giving up. You may need to tweak this if you experience lock issues. The
+                  default is to let Sqlite 3.x do it's default behaviour.
+               </entry></row>
+
+             <row><entry><literal>max-connections</literal></entry>
+               <entry><literal>number</literal></entry>
+               <entry valign="bottom">
+                  Create a pool with this number of connections open.
+               </entry></row>
+
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>Example configuration:</para>
+
+<programlisting>
+group = sqlite3-connection
+id = s3-sqlbox
+host = localhost
+database = /path/to/kannel3.db
+lock-timeout = 5
 max-connections = 1
 </programlisting>
       </sect2>

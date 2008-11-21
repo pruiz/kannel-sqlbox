@@ -2,8 +2,10 @@ man1pages = gw/sqlbox.1
 man5pages = gw/sqlbox.5
 docsrcs = $(wildcard grep -l '<!DOCTYPE ' doc/*.xml)
 docs = $(docsrcs:.xml=.html) $(docsrcs:.xml=.rtf) $(docsrcs:.xml=.ps) $(docsrcs:.xml=.pdf)
+rpmtemp = /tmp/sqlbox-rpm
 DOCSTARGET=@DOCSTARGET@
 DOCDRAFTS=@DOCDRAFTS@
+RPMPKG=sqlbox-@PACKAGE_VERSION@
 
 pssrcs = $(wildcard doc/*.png)
 ps = $(pssrcs:.png=.ps)  
@@ -53,6 +55,23 @@ figs = $(figsrcs:.fig=.png)  $(figsrcs:.fig=.ps)
 
 .png.ps:
 	$(CONVERT) $< $@
+
+rpm: clean
+	@echo "Preparing to build the RPM files"
+	mkdir -p "$(rpmtemp)/${RPMPKG}"
+	cp -R * "$(rpmtemp)/${RPMPKG}"
+	tar -C "$(rpmtemp)" -c ${RPMPKG} -zf ${RPMPKG}.tar.gz
+	rm -rf "$(rpmtemp)/${RPMPKG}"
+	if [ -d $(rpmtemp) ]; then rmdir "$(rpmtemp)"; fi
+	@echo "Building the RPM"
+	rpmbuild -ta ${RPMPKG}.tar.gz
+	rm -f ${RPMPKG}.tar.gz
+	@echo "**********************************************************************"
+	@echo "* Success!"
+	@echo "* Your files are located under $(shell rpm --eval '%_rpmdir')"
+	@echo "* The Kannel Group <http://www.kannel.org/>"
+	@echo "**********************************************************************"
+	@echo "Thank you for using Kannel."
 
 docs: figs ps $(docs)
 no-docs:

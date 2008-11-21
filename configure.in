@@ -431,6 +431,74 @@ fi
 
 AC_CHECK_LIB([gwlib], [cfg_create], [], AC_MSG_ERROR([Kannel gwlib is required!]))
 
-AC_CONFIG_FILES([Makefile gw/Makefile])
+AC_MSG_CHECKING(for Kannel's DB support)
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(
+#if defined(HAVE_SQLITE3)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "sqlite3", [RPM Suffix])
+AC_SUBST(rpm_requires, "sqlite3-devel >= 1.8", [RPM Requires])
+])
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(void){
+#if defined(HAVE_SQLITE)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "sqlite", [RPM Suffix])
+AC_SUBST(rpm_requires, "sqlite2-devel >= 2.7", [RPM Requires])
+])
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(void){
+#if defined(HAVE_PGSQL)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "pgsql", [RPM Suffix])
+AC_SUBST(rpm_requires, "postgresql-devel >= 7.2", [RPM Requires])
+])
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(void){
+#if defined(HAVE_ORACLE)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "oracle", [RPM Suffix])
+AC_SUBST(rpm_requires, "oracle-instantclient-devel >= 8", [RPM Requires])
+])
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(void){
+#if defined(HAVE_MYSQL)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "mysql", [RPM Suffix])
+AC_SUBST(rpm_requires, "mysql-devel >= 3.23", [RPM Requires])
+])
+
+AC_TRY_RUN([#include "gw-config.h"
+int main(void){
+#if defined(HAVE_SDB)
+  exit(0);
+#endif
+  exit(1);
+}],[
+AC_SUBST(rpm_suffix, "sdb", [RPM Suffix])
+AC_SUBST(rpm_requires, "libsdb-devel >= 0.5", [RPM Requires])
+])
+
+AC_CONFIG_FILES([Makefile gw/Makefile rpm/sqlbox.spec])
 
 AC_OUTPUT

@@ -1,3 +1,8 @@
+2008/11/21 - Alejandro Guerrieri <aguerrieri at kannel dot org>
+  - Completed documentation on missing DB modules.
+  - Added RPM support. Now it's possible to build RPM's natively by running "make rpm" instead of "make".
+    The module detects the DB engine compiled on Kannel and renames the RPM accordingly.
+
 2008/11/18 - 0.7.1 [CVS Tag: rev-0-7-1] - Alejandro Guerrieri <aguerrieri at kannel dot org>
 	- Added support for the LibSDB database abstraction library. DB support is now similar to Kannel's.
 	- Extensive code reorganization to move the queries into the header files and allow reusing from the libsdb module.

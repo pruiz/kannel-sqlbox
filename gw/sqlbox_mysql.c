@@ -284,7 +284,7 @@ found:
     db_conf->mysql->password = mysql_pass;
     db_conf->mysql->database = mysql_db;
     if (have_port) {
-	db_conf->mysql->port = mysql_port;
+    	db_conf->mysql->port = mysql_port;
     }
 
     pool = dbpool_create(DBPOOL_MYSQL, db_conf, pool_size);

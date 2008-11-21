@@ -52,11 +52,11 @@ log-level = 0
 # Example SQLITE 2 Connection
 #group = sqlite-connection
 #id = sqlbox-db
-#database = kannel.db
+#database = /path/to/kannel.db
 #max-connections = 1
 
 # Example SQLITE 3 Connection
 #group = sqlite3-connection
 #id = sqlbox-db
-#database = kannel.db
+#database = /path/to/kannel.db
 #max-connections = 1
