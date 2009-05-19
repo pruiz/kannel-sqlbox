@@ -344,8 +344,8 @@ AC_SUBST(CTLIB_INCLUDE)
 
 dnl Checking for FreeTDS ct-lib support
 AC_MSG_CHECKING(for FreeTDS Ct-Lib support)
-AC_ARG_WITH(freetds,
-[  --with-freetds[=DIR]    Include FreeTDS Ct-Lib support.  DIR is the FreeTDS
+AC_ARG_WITH(mssql,
+[  --with-mssql[=DIR]    Include FreeTDS Ct-Lib support.  DIR is the FreeTDS
                           install directory, defaults to /usr/local.],
 [
     if test "$withval" = "yes"; then

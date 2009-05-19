@@ -2,7 +2,7 @@
 
 #if defined(HAVE_PGSQL) || defined(HAVE_SDB)
 
-#define SQLBOX_PGSQL_CREATE_LOG_TABLE	"CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, \
+#define SQLBOX_PGSQL_CREATE_LOG_TABLE "CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, \
 momt VARCHAR(3) CHECK(momt IN ('MO', 'MT', 'DLR', NULL)) DEFAULT NULL, \
 sender VARCHAR(20) NULL, receiver VARCHAR(20) NULL, udhdata VARCHAR(255) NULL, \
 msgdata VARCHAR(255) NULL, time BIGINT NULL, smsc_id VARCHAR(255) NULL, \
@@ -12,7 +12,7 @@ compress BIGINT NULL, validity BIGINT NULL, deferred BIGINT NULL, \
 dlr_mask BIGINT NULL, dlr_url VARCHAR(255) NULL, pid BIGINT NULL, alt_dcs BIGINT NULL, \
 rpi BIGINT NULL, charset VARCHAR(255) NULL, boxc_id VARCHAR(255) NULL, binfo VARCHAR(255) NULL)"
 
-#define SQLBOX_PGSQL_CREATE_INSERT_TABLE	"CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, \
+#define SQLBOX_PGSQL_CREATE_INSERT_TABLE "CREATE TABLE %S (sql_id SERIAL PRIMARY KEY, \
 momt VARCHAR(3) CHECK(momt IN ('MO', 'MT', NULL)) DEFAULT NULL, \
 sender VARCHAR(20) NULL, receiver VARCHAR(20) NULL, udhdata VARCHAR(255) NULL, \
 msgdata VARCHAR(255) NULL, time BIGINT NULL, smsc_id VARCHAR(255) NULL, \
@@ -22,16 +22,16 @@ compress BIGINT NULL, validity BIGINT NULL, deferred BIGINT NULL, \
 dlr_mask BIGINT NULL, dlr_url VARCHAR(255) NULL, pid BIGINT NULL, alt_dcs BIGINT NULL, \
 rpi BIGINT NULL, charset VARCHAR(255) NULL, boxc_id VARCHAR(255) NULL, binfo VARCHAR(255) NULL)"
 
-#define SQLBOX_PGSQL_SELECT_QUERY	"SELECT sql_id, momt, sender, receiver, udhdata, msgdata, \
+#define SQLBOX_PGSQL_SELECT_QUERY "SELECT sql_id, momt, sender, receiver, udhdata, msgdata, \
 time, smsc_id, service, account, id, sms_type, mclass, mwi, coding, compress, validity, deferred, \
 dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo FROM %S LIMIT 1 OFFSET 0"
 
-#define SQLBOX_PGSQL_INSERT_QUERY	"INSERT INTO %S (momt, sender, receiver, udhdata, msgdata, \
+#define SQLBOX_PGSQL_INSERT_QUERY "INSERT INTO %S (momt, sender, receiver, udhdata, msgdata, \
 time, smsc_id, service, account, sms_type, mclass, mwi, coding, compress, validity, deferred, \
 dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo) VALUES (%S, %S, %S, %S, %S, %S, \
 %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S)"
 
-#define SQLBOX_PGSQL_DELETE_QUERY	"DELETE FROM %S WHERE sql_id = %S"
+#define SQLBOX_PGSQL_DELETE_QUERY "DELETE FROM %S WHERE sql_id = %S"
 
 #endif /* HAVE_PGSQL || HAVE_SDB */
 
