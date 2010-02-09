@@ -1,3 +1,7 @@
+2009/12/28 - Alejandro Guerrieri <aguerrieri at kannel dot org>
+  - Added support for meta-data on all DB engines
+  - Added support for automake 1.11
+
 2009/05/19 - Alejandro Guerrieri <aguerrieri at kannel dot org>
   - Added support for MS-SQL and Sybase
   - Added rpm target

@@ -140,6 +140,7 @@ Msg *mysql_fetch_msg()
             msg->sms.rpi        = atol_null(row[22]);
             msg->sms.charset    = octstr_null_create(row[23]);
             msg->sms.binfo      = octstr_null_create(row[25]);
+            msg->sms.meta_data  = octstr_null_create(row[26]);
             if (row[24] == NULL) {
                 msg->sms.boxc_id= octstr_duplicate(sqlbox_id);
             }
@@ -149,7 +150,7 @@ Msg *mysql_fetch_msg()
             /* delete current row */
             delet = octstr_format(SQLBOX_MYSQL_DELETE_QUERY, sqlbox_insert_table, id);
 #if defined(SQLBOX_TRACE)
-     debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(delet));
+            debug("SQLBOX", 0, "sql: %s", octstr_get_cstr(delet));
 #endif
             mysql_update(delet);
             octstr_destroy(id);
@@ -195,7 +196,7 @@ void mysql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
      * hex values to be able to store in the database
      */
     if(msg->sms.coding == 2)
-             octstr_binary_to_hex(msg->sms.msgdata,1);
+        octstr_binary_to_hex(msg->sms.msgdata, 1);
 
     sql = octstr_format(SQLBOX_MYSQL_INSERT_QUERY, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender),
         st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),
@@ -203,9 +204,9 @@ void mysql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
         st_num(msg->sms.mclass), st_num(msg->sms.mwi), st_num(msg->sms.coding), st_num(msg->sms.compress),
         st_num(msg->sms.validity), st_num(msg->sms.deferred), st_num(msg->sms.dlr_mask), st_str(msg->sms.dlr_url),
         st_num(msg->sms.pid), st_num(msg->sms.alt_dcs), st_num(msg->sms.rpi), st_str(msg->sms.charset),
-        st_str(msg->sms.boxc_id), st_str(msg->sms.binfo));
+        st_str(msg->sms.boxc_id), st_str(msg->sms.binfo), st_str(msg->sms.meta_data));
     sql_update(sql);
-     while (stuffcount > 0) {
+    while (stuffcount > 0) {
         octstr_destroy(stuffer[--stuffcount]);
     }
     octstr_destroy(sql);
@@ -235,7 +236,7 @@ struct server_type *sqlbox_init_mysql(Cfg* cfg)
         panic(0, "SQLBOX: MySQL: group 'sqlbox' is not specified!");
 
     if (!(mysql_id = cfg_get(grp, octstr_imm("id"))))
-           panic(0, "SQLBOX: MySQL: directive 'id' is not specified!");
+        panic(0, "SQLBOX: MySQL: directive 'id' is not specified!");
 
     /*
      * now grap the required information from the 'mysql-connection' group
@@ -247,14 +248,14 @@ struct server_type *sqlbox_init_mysql(Cfg* cfg)
 
      grplist = cfg_get_multi_group(cfg, octstr_imm("mysql-connection"));
      while (grplist && (grp = (CfgGroup *)gwlist_extract_first(grplist)) != NULL) {
-        p = cfg_get(grp, octstr_imm("id"));
-        if (p != NULL && octstr_compare(p, mysql_id) == 0) {
-            goto found;
-        }
-        if (p != NULL) octstr_destroy(p);
+         p = cfg_get(grp, octstr_imm("id"));
+         if (p != NULL && octstr_compare(p, mysql_id) == 0) {
+             goto found;
+         }
+         if (p != NULL) octstr_destroy(p);
      }
      panic(0, "SQLBOX: MySQL: connection settings for id '%s' are not specified!",
-           octstr_get_cstr(mysql_id));
+         octstr_get_cstr(mysql_id));
 
 found:
     octstr_destroy(p);
@@ -264,13 +265,13 @@ found:
         pool_size = 1;
 
     if (!(mysql_host = cfg_get(grp, octstr_imm("host"))))
-           panic(0, "SQLBOX: MySQL: directive 'host' is not specified!");
+        panic(0, "SQLBOX: MySQL: directive 'host' is not specified!");
     if (!(mysql_user = cfg_get(grp, octstr_imm("username"))))
-           panic(0, "SQLBOX: MySQL: directive 'username' is not specified!");
+        panic(0, "SQLBOX: MySQL: directive 'username' is not specified!");
     if (!(mysql_pass = cfg_get(grp, octstr_imm("password"))))
-           panic(0, "SQLBOX: MySQL: directive 'password' is not specified!");
+        panic(0, "SQLBOX: MySQL: directive 'password' is not specified!");
     if (!(mysql_db = cfg_get(grp, octstr_imm("database"))))
-           panic(0, "SQLBOX: MySQL: directive 'database' is not specified!");
+        panic(0, "SQLBOX: MySQL: directive 'database' is not specified!");
     have_port = (cfg_get_integer(&mysql_port, grp, octstr_imm("port")) != -1);
 
     /*
