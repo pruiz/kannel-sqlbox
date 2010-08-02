@@ -252,7 +252,7 @@ static int send_msg(Connection *conn, Boxc *boxconn, Msg *pmsg)
 static void smsbox_to_bearerbox(void *arg)
 {
     Boxc *conn = arg;
-    Msg *msg;
+    Msg *msg, *msg_escaped;
 
     /* remove messages from socket until it is closed */
     while (sqlbox_status != SQL_DEAD && conn->alive) {
@@ -269,7 +269,9 @@ static void smsbox_to_bearerbox(void *arg)
         if (msg_type(msg) == sms) {
             debug("sqlbox", 0, "smsbox_to_bearerbox: sms received");
 
-            gw_sql_save_msg(msg, octstr_imm("MT"));
+	    msg_escaped = msg_duplicate(msg);
+            gw_sql_save_msg(msg_escaped, octstr_imm("MT"));
+	    msg_destroy(msg_escaped);
         }
 
         send_msg(conn->bearerbox_connection, conn, msg);
@@ -375,7 +377,7 @@ static Boxc *accept_boxc(int fd, int ssl)
 
 static void bearerbox_to_smsbox(void *arg)
 {
-    Msg *msg;
+    Msg *msg, *msg_escaped;
     Boxc *conn = arg;
 
     while (sqlbox_status != SQL_DEAD && conn->alive) {
@@ -398,10 +400,12 @@ static void bearerbox_to_smsbox(void *arg)
         break;
     }
     if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
+	msg_escaped = msg_duplicate(msg);
         if (msg->sms.sms_type != report_mo)
-            gw_sql_save_msg(msg, octstr_imm("MO"));
+            gw_sql_save_msg(msg_escaped, octstr_imm("MO"));
         else
-            gw_sql_save_msg(msg, octstr_imm("DLR"));
+            gw_sql_save_msg(msg_escaped, octstr_imm("DLR"));
+	msg_destroy(msg_escaped);
     }
     send_msg(conn->smsbox_connection, conn, msg);
         msg_destroy(msg);
