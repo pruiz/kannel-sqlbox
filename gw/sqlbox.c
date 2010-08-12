@@ -491,7 +491,7 @@ static void identify_to_bearerbox(Boxc *conn)
 static void bearerbox_to_sql(void *arg)
 {
     Boxc *conn = (Boxc *)arg;
-    Msg *msg;
+    Msg *msg, *mack;
 
     while (sqlbox_status == SQL_RUNNING) {
         msg = read_from_box(conn->bearerbox_connection, conn);
@@ -522,7 +522,17 @@ static void bearerbox_to_sql(void *arg)
                 gw_sql_save_msg(msg, octstr_imm("MO"));
             else
                 gw_sql_save_msg(msg, octstr_imm("DLR"));
+
+	    /* create ack message */
+	    mack = msg_create(ack);
+	    mack->ack.nack = ack_success;
+	    mack->ack.time = msg->sms.time;
+	    uuid_copy(mack->ack.id, msg->sms.id);
+	    send_msg(conn->bearerbox_connection, conn, mack);
+	    msg_destroy(mack);
+
         }
+
         msg_destroy(msg);
     }
 }
