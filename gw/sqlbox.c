@@ -149,6 +149,10 @@ static int sqlbox_is_allowed_in_group(Octstr *group, Octstr *variable)
     return 0;
 }
 
+#undef OCTSTR
+#undef SINGLE_GROUP
+#undef MULTI_GROUP
+
 static int sqlbox_is_single_group(Octstr *query)
 {
     #define OCTSTR(name)
@@ -173,48 +177,25 @@ static int sqlbox_is_single_group(Octstr *query)
 
 static Msg *read_from_box(Connection *conn, Boxc *boxconn)
 {
-    int ret;
-    Octstr *pack;
     Msg *msg;
 
-    pack = NULL;
-    while (sqlbox_status != SQL_DEAD && boxconn->alive) {
-            /* XXX: if box doesn't send (just keep conn open) we block here while shutdown */
-        pack = conn_read_withlen(conn);
-        gw_claim_area(pack);
-        if (pack != NULL)
-            break;
-/*
-        RK: 20041012 - function conn_read_error has disappeared.
-        if (conn_read_error(conn)) {
-            info(0, "Read error when reading from box <%s>, disconnecting",
-                 octstr_get_cstr(boxconn->client_ip));
-            return NULL;
-        }
-*/
-        if (conn_eof(conn)) {
-            info(0, "Connection closed by the box <%s>",
-                 octstr_get_cstr(boxconn->client_ip));
-            return NULL;
-        }
-
-        ret = conn_wait(conn, -1.0);
-        if (ret < 0) {
-            error(0, "Connection to box <%s> broke.",
-                  octstr_get_cstr(boxconn->client_ip));
-            return NULL;
-        }
+    while (boxconn->alive) {
+	switch (read_from_bearerbox_real(conn, &msg, 1.0)) {
+	case -1:
+	    /* connection to bearerbox lost */
+	    return NULL;
+	    break;
+	case  0:
+	    /* all is well */
+	    return msg;
+	    break;
+	case  1:
+	    /* timeout */
+	    break;
+	}
     }
 
-    if (pack == NULL)
-        return NULL;
-
-    msg = msg_unpack(pack);
-    octstr_destroy(pack);
-
-    if (msg == NULL)
-        error(0, "Failed to unpack data!");
-    return msg;
+    return NULL;
 }
 
 /*
@@ -255,7 +236,7 @@ static void smsbox_to_bearerbox(void *arg)
     Msg *msg, *msg_escaped;
 
     /* remove messages from socket until it is closed */
-    while (sqlbox_status != SQL_DEAD && conn->alive) {
+    while (sqlbox_status == SQL_RUNNING && conn->alive) {
 
         //list_consume(suspended);    /* block here if suspended */
 
@@ -268,13 +249,13 @@ static void smsbox_to_bearerbox(void *arg)
 
         if (msg_type(msg) == sms) {
             debug("sqlbox", 0, "smsbox_to_bearerbox: sms received");
-
 	    msg_escaped = msg_duplicate(msg);
-            gw_sql_save_msg(msg_escaped, octstr_imm("MT"));
+	    gw_sql_save_msg(msg_escaped, octstr_imm("MT"));
 	    msg_destroy(msg_escaped);
-        }
+	}
 
-        send_msg(conn->bearerbox_connection, conn, msg);
+	send_msg(conn->bearerbox_connection, conn, msg);
+
         /* if this is an identification message from an smsbox instance */
         if (msg_type(msg) == admin && msg->admin.command == cmd_identify) {
             /*
@@ -380,15 +361,25 @@ static void bearerbox_to_smsbox(void *arg)
     Msg *msg, *msg_escaped;
     Boxc *conn = arg;
 
-    while (sqlbox_status != SQL_DEAD && conn->alive) {
+    while (sqlbox_status == SQL_RUNNING && conn->alive) {
 
     msg = read_from_box(conn->bearerbox_connection, conn);
-        if (msg == NULL) {
+
+    if (msg == NULL) {
+        /* tell sqlbox to die */
+	conn->alive = 0;
+	debug("sqlbox", 0, "bearerbox_to_smsbox: connection to bearerbox died.");
+	break;
+    }
+    if (msg_type(msg) == admin) {
+	if (msg->admin.command == cmd_shutdown || msg->admin.command == cmd_restart) {
             /* tell sqlbox to die */
-        conn->alive = 0;
-            debug("sqlbox", 0, "bearerbox_to_smsbox: connection to bearerbox died.");
-        break;
-        }
+	    conn->alive = 0;
+            debug("sqlbox", 0, "bearerbox_to_smsbox: Bearerbox told us to shutdown.");
+	    break;
+	}
+    }
+
         if (msg_type(msg) == heartbeat) {
         // todo
             debug("sqlbox", 0, "bearerbox_to_smsbox: catch an heartbeat - we are alive");
@@ -396,9 +387,9 @@ static void bearerbox_to_smsbox(void *arg)
             continue;
         }
         if (!conn->alive) {
-        msg_destroy(msg);
-        break;
-    }
+	    msg_destroy(msg);
+	    break;
+	}
     if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
 	msg_escaped = msg_duplicate(msg);
         if (msg->sms.sms_type != report_mo)
@@ -411,7 +402,6 @@ static void bearerbox_to_smsbox(void *arg)
         msg_destroy(msg);
     }
     /* the client closes the connection, after that die in receiver */
-    sqlbox_status = SQL_SHUTDOWN;
     conn->alive = 0;
 }
 
@@ -451,8 +441,9 @@ static void wait_for_connections(int fd, void (*function) (void *arg),
 
     gw_assert(function != NULL);
 
-    while(sqlbox_status != SQL_DEAD) {
+    while(sqlbox_status == SQL_RUNNING) {
 
+        ret = gwthread_pollfd(fd, POLLIN, 1.0);
         if (sqlbox_status == SQL_SHUTDOWN) {
             if (ret == -1 || !timeout)
                     break;
@@ -460,7 +451,6 @@ static void wait_for_connections(int fd, void (*function) (void *arg),
                     timeout--;
         }
 
-            ret = gwthread_pollfd(fd, POLLIN, 1.0);
         if (ret > 0) {
             gwthread_create(function, (void *)fd);
             gwthread_sleep(1.0);
@@ -493,7 +483,7 @@ static void bearerbox_to_sql(void *arg)
     Boxc *conn = (Boxc *)arg;
     Msg *msg, *mack;
 
-    while (sqlbox_status == SQL_RUNNING) {
+    while (sqlbox_status == SQL_RUNNING && conn->alive) {
         msg = read_from_box(conn->bearerbox_connection, conn);
 
         if (msg == NULL) {    /* garbage/connection lost */
@@ -514,7 +504,7 @@ static void bearerbox_to_sql(void *arg)
                     /* tell sqlbox to die */
             conn->alive = 0;
             sqlbox_status = SQL_SHUTDOWN;
-            debug("sqlbox", 0, "bearerbox_to_sql: connection to bearerbox died.");
+            debug("sqlbox", 0, "bearerbox_to_sql: Bearerbox told us to shutdown.");
             break;
         }
         if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
@@ -559,7 +549,7 @@ static void sql_to_bearerbox(void *arg)
 
     identify_to_bearerbox(boxc);
 
-    while (sqlbox_status == SQL_RUNNING) {
+    while (sqlbox_status == SQL_RUNNING && boxc->alive) {
         if ((msg = gw_sql_fetch_msg()) != NULL) {
             if (global_sender != NULL && (msg->sms.sender == NULL || octstr_len(msg->sms.sender) == 0)) {
                 msg->sms.sender = octstr_duplicate(global_sender);
@@ -715,6 +705,7 @@ static void init_sqlbox(Cfg *cfg)
     if (sql_type == NULL) {
         panic(0, "No proper SQL server defined.");
     }
+
     gw_sql_enter(cfg);
 
     sqlbox_status = SQL_RUNNING;

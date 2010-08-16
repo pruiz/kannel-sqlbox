@@ -1,3 +1,7 @@
+2010/06/16 - Rene Kluwen <rene.kluwen at chimit.nl>
+  - Fixed bug that sqlbox didn't disconnect from bearerbox when one of the attached
+  smsboxes would disconnect.
+
 2010/08/02 - Alejandro Guerrieri <aguerrieri at kannel dot org>
   - Fixes bug that prevented single quotes to be used on message text and other fields.
     Thanks Rene Kluwen for this patch.
