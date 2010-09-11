@@ -1,3 +1,7 @@
+2010/09/11 - Alejandro Guerrieri <aguerrieri at kannel dot org>
+  - Fixed bug: Not all sms messages were acked properly before, leaving messages in the message store.
+    Thanks Rene Kluwen for this patch.
+
 2010/06/16 - Rene Kluwen <rene.kluwen at chimit.nl>
   - Fixed bug that sqlbox didn't disconnect from bearerbox when one of the attached
   smsboxes would disconnect.

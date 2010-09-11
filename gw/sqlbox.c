@@ -390,7 +390,7 @@ static void bearerbox_to_smsbox(void *arg)
 	    msg_destroy(msg);
 	    break;
 	}
-    if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
+    if (msg_type(msg) == sms) {
 	msg_escaped = msg_duplicate(msg);
         if (msg->sms.sms_type != report_mo)
             gw_sql_save_msg(msg_escaped, octstr_imm("MO"));
@@ -507,7 +507,7 @@ static void bearerbox_to_sql(void *arg)
             debug("sqlbox", 0, "bearerbox_to_sql: Bearerbox told us to shutdown.");
             break;
         }
-        if ((msg_type(msg) == sms) && (strcmp(octstr_get_cstr(msg->sms.msgdata),"ACK/") != 0)) {
+        if (msg_type(msg) == sms) {
             if (msg->sms.sms_type != report_mo)
                 gw_sql_save_msg(msg, octstr_imm("MO"));
             else
