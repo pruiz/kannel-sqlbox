@@ -101,9 +101,8 @@ Msg *sqlite3_fetch_msg()
     DBPoolConn *pc;
     sqlite3_stmt *res = NULL;
     int rows = 0;
-
     Msg *msg = NULL;
-    Octstr *sql, *delet, *id;
+    Octstr *sql, *delet, *id = NULL;
 
     pc = dbpool_conn_consume(pool);
     if (pc == NULL) {

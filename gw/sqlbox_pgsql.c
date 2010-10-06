@@ -58,7 +58,6 @@ static void pgsql_update(const Octstr *sql)
 
 static PGresult *pgsql_select(const Octstr *sql)
 {
-    int state;
     PGresult *res = NULL;
     DBPoolConn *pc;
 
@@ -73,12 +72,15 @@ static PGresult *pgsql_select(const Octstr *sql)
     }
 
     res = PQexec(pc->conn, octstr_get_cstr(sql));
-    switch(PQresultStatus(res)) {
+    switch (PQresultStatus(res)) {
         case PGRES_EMPTY_QUERY:
         case PGRES_BAD_RESPONSE:
         case PGRES_NONFATAL_ERROR:
         case PGRES_FATAL_ERROR:
             error(0, "PGSQL: %s", PQresultErrorMessage(res));
+            break;
+        default:
+            /* all other enum values are not handled. */
             break;
     }
     dbpool_conn_produce(pc);
