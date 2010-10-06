@@ -83,8 +83,6 @@ static int sqlbox_port_ssl = 0;
 static long bearerbox_port;
 static Octstr *bearerbox_host;
 static int bearerbox_port_ssl = 0;
-static Octstr *box_allow_ip;
-static Octstr *box_deny_ip;
 static Octstr *global_sender;
 
 #ifndef HAVE_MSSQL
@@ -410,7 +408,6 @@ static void run_sqlbox(void *arg)
     int fd;
     Boxc *newconn;
     long sender;
-    Msg *msg;
 
     fd = (int)arg;
     newconn = accept_boxc(fd, sqlbox_port_ssl);
@@ -530,7 +527,6 @@ static void bearerbox_to_sql(void *arg)
 static void sql_to_bearerbox(void *arg)
 {
     Boxc *boxc;
-    int fd;
     Msg *msg;
 
     boxc = gw_malloc(sizeof(Boxc));
@@ -652,9 +648,7 @@ static void init_sqlbox(Cfg *cfg)
 {
     CfgGroup *grp;
     Octstr *logfile;
-    Octstr *p;
     long lvl;
-    int ssl = 0;
 
     /* some default values */
     sqlbox_port_ssl = 0;

@@ -24,60 +24,6 @@ static DBPool *pool = NULL;
  *-------------------------------------------------
 */
 
-static void* pgsql_open_conn(const DBConf *db_conf)
-{
-    PGconn *conn = NULL;
-    PgSQLConf *conf = db_conf->pgsql; /* make compiler happy */
-    char tmp[1024];
-    char cs[1024];
-
-    cs[0]='\0';
-
-    /* sanity check */
-    if (conf == NULL)
-        return NULL;
-
-    sprintf(tmp, " host=%s", octstr_get_cstr(conf->host));
-    if (strlen(tmp)) strcat(cs, tmp);
-
-    sprintf(tmp, " user=%s", octstr_get_cstr(conf->username));
-    if (strlen(tmp)) strcat(cs, tmp);
-
-    sprintf(tmp, " password=%s", octstr_get_cstr(conf->password));
-    if (strlen(tmp)) strcat(cs, tmp);
-
-    sprintf(tmp, " dbname=%s", octstr_get_cstr(conf->database));
-    if (strlen(tmp)) strcat(cs, tmp);
-
-  /*
-    if (conf->pgport) octstr_append(connstr, octstr_format("port=%s ", conf->pgport));
-    if (conf->pgoptions) octstr_append(connstr, octstr_format("options=%s ", conf->pgoptions));
-    if (conf->pgtty) octstr_append(connstr, octstr_format("tty=%s ", conf->pgtty));
-    */
-
-    info(0, "PGSQL: Using connection string: %s.", cs);
-
-    conn = PQconnectdb(cs);
-
-    gw_assert (conn != NULL);
-
-    if (PQstatus(conn) == CONNECTION_BAD) {
-        error(0, "PGSQL: connection to database %s failed!", octstr_get_cstr(conf->database));
-    error(0, "PGSQL: %s", PQerrorMessage(conn));
-       goto failed;
-    }
-
-
-    info(0, "PGSQL: Connected to server at %s.", octstr_get_cstr(conf->host));
-
-    return conn;
-
-failed:
-    exit_nicely(conn);
-    if (conn != NULL) gw_free(conn);
-    return NULL;
-}
-
 static void pgsql_update(const Octstr *sql)
 {
     DBPoolConn *pc;
@@ -101,6 +47,9 @@ static void pgsql_update(const Octstr *sql)
     case PGRES_NONFATAL_ERROR:
     case PGRES_FATAL_ERROR:
         error (0, "PGSQL: %s", PQresultErrorMessage(res));
+        break;
+    default:
+        /* Don't handle the other PGRES_foobar enumerates. */
         break;
     }
 

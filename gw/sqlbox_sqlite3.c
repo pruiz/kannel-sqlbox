@@ -46,7 +46,6 @@ static int sqlite3_update(DBPoolConn *conn, const Octstr *sql)
 sqlite3_stmt* sqlite3_select(DBPoolConn *conn, const Octstr *sql)
 {
     int res;
-    const char *query_tail = NULL;
     sqlite3_stmt *stmt = NULL;
 
 #if defined(SQLBOX_TRACE)
@@ -100,10 +99,8 @@ Msg *sqlite3_fetch_msg()
 {
     int state;
     DBPoolConn *pc;
-    char *errmsg = 0;
-    const char *query_tail = NULL;
     sqlite3_stmt *res = NULL;
-    int i, rows = 0;
+    int rows = 0;
 
     Msg *msg = NULL;
     Octstr *sql, *delet, *id;
@@ -111,7 +108,7 @@ Msg *sqlite3_fetch_msg()
     pc = dbpool_conn_consume(pool);
     if (pc == NULL) {
         error(0, "SQLITE3: Database pool got no connection! DB update failed!");
-        return;
+        return NULL;
     }
 
     sql = octstr_format(SQLBOX_SQLITE3_SELECT_QUERY, sqlbox_insert_table);
@@ -238,8 +235,7 @@ struct server_type *sqlbox_init_sqlite3(Cfg* cfg)
     List *grplist;
     Octstr *sqlite3_db, *sqlite3_id;
     Octstr *p = NULL;
-    long pool_size;
-    int lock_timeout;
+    long pool_size, lock_timeout;
     DBConf *db_conf = NULL;
     struct server_type *res = NULL;
 
