@@ -1,4 +1,8 @@
 2010-10-07  Stipe Tolj  <stolj at kannel.org>
+    * autotools/*, aclocal.m4, configure, Makefile.in: add autotool build by
+      bootstrap run for distribution.
+      
+2010-10-07  Stipe Tolj  <stolj at kannel.org>
     * gw/sqlbox_[pgsql|sqlite3].c: more compiler warning fixes.
     
 2010-10-06  Stipe Tolj  <stolj at kannel.org>
