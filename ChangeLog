@@ -1,3 +1,9 @@
+2010-11-02  Stipe Tolj  <stolj at kannel.org>
+    * acinclude.m4: use the gateway version to have the terminal sequences and
+      various other m4 functions available.
+    * configure[.in]: make the output looks like the gateway version, with 
+      cleaner sections. Fixed cygwin platform builds.
+
 2010-10-07  Stipe Tolj  <stolj at kannel.org>
     * autotools/*, aclocal.m4, configure, Makefile.in: add autotool build by
       bootstrap run for distribution.

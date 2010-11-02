@@ -1,10 +1,68 @@
+dnl /* ==================================================================== 
+dnl  * The Kannel Software License, Version 1.0 
+dnl  * 
+dnl  * Copyright (c) 2001-2010 Kannel Group  
+dnl  * Copyright (c) 1998-2001 WapIT Ltd.   
+dnl  * All rights reserved. 
+dnl  * 
+dnl  * Redistribution and use in source and binary forms, with or without 
+dnl  * modification, are permitted provided that the following conditions 
+dnl  * are met: 
+dnl  * 
+dnl  * 1. Redistributions of source code must retain the above copyright 
+dnl  *    notice, this list of conditions and the following disclaimer. 
+dnl  * 
+dnl  * 2. Redistributions in binary form must reproduce the above copyright 
+dnl  *    notice, this list of conditions and the following disclaimer in 
+dnl  *    the documentation and/or other materials provided with the 
+dnl  *    distribution. 
+dnl  * 
+dnl  * 3. The end-user documentation included with the redistribution, 
+dnl  *    if any, must include the following acknowledgment: 
+dnl  *       "This product includes software developed by the 
+dnl  *        Kannel Group (http://www.kannel.org/)." 
+dnl  *    Alternately, this acknowledgment may appear in the software itself, 
+dnl  *    if and wherever such third-party acknowledgments normally appear. 
+dnl  * 
+dnl  * 4. The names "Kannel" and "Kannel Group" must not be used to 
+dnl  *    endorse or promote products derived from this software without 
+dnl  *    prior written permission. For written permission, please  
+dnl  *    contact org@kannel.org. 
+dnl  * 
+dnl  * 5. Products derived from this software may not be called "Kannel", 
+dnl  *    nor may "Kannel" appear in their name, without prior written 
+dnl  *    permission of the Kannel Group. 
+dnl  * 
+dnl  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED 
+dnl  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
+dnl  * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+dnl  * DISCLAIMED.  IN NO EVENT SHALL THE KANNEL GROUP OR ITS CONTRIBUTORS 
+dnl  * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,  
+dnl  * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT  
+dnl  * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR  
+dnl  * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,  
+dnl  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE  
+dnl  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,  
+dnl  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+dnl  * ==================================================================== 
+dnl  * 
+dnl  * This software consists of voluntary contributions made by many 
+dnl  * individuals on behalf of the Kannel Group.  For more information on  
+dnl  * the Kannel Group, please see <http://www.kannel.org/>. 
+dnl  * 
+dnl  * Portions of this software are based upon software originally written at  
+dnl  * WapIT Ltd., Helsinki, Finland for the Kannel project.  
+dnl  */ 
+
 dnl SqlBox - Open Source Kannel Extension for store messages
 dnl
 dnl Rene Kluwen <rene dot kluwen at chimit dot nl>
 dnl 
 dnl Stand alone module by Martin Conte <reflejo at gmail dot com>
 dnl 
-dnl Documentation and additional patches by Alejandro Guerrieri <aguerrieri at kannel dot org>
+dnl Documentation and additional patches by 
+dnl   Alejandro Guerrieri <aguerrieri at kannel dot org>
+dnl   Stipe Tolj <stolj at kannel dot org>
 dnl 
 dnl This program is free software, distributed under the terms of
 dnl the GNU General Public License, with a few exceptions granted (see LICENSE)
@@ -16,17 +74,20 @@ dnl Initialization
 AC_INIT([sqlbox],[cvs],[devel@kannel.org])
 AC_CONFIG_SRCDIR([gw/sqlbox.c])
 AC_CONFIG_AUX_DIR(autotools)
+AC_SET_TERMINAL_SEQUENCES()
+AC_CONFIG_NICE(config.nice)
 
 dnl Check version number.
-AC_MSG_CHECKING([cvs checkout date])
-AC_CVS_DATE(CVS_DATE)
-AC_MSG_RESULT([$CVS_DATE])
-VERSION="cvs-$CVS_DATE"
+AC_MSG_CHECKING([svn checkout revision])
+AC_SVN_REVISION(SVN_REVISION)
+AC_MSG_RESULT([$SVN_REVISION])
+VERSION="svn-r$SVN_REVISION"
 SB_NAME="SqlBox"
 
 dnl Defines
 AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
 AC_SUBST(VERSION)
+AC_CONFIG_SECTION([Configuring for Kannel sqlbox version $VERSION])
 
 AM_INIT_AUTOMAKE([$SB_NAME], [$VERSION])
 AC_CONFIG_HEADERS([sb-config.h])
@@ -73,6 +134,7 @@ case "$host" in
     ;;
   *-cygwin*)
     EXE_EXT=".exe"
+    LDFLAGS="$LDFLAGS -Wl,--enable-auto-import"
     ;;
   *apple-darwin*) 
     CFLAGS="$CFLAGS -DDARWIN=1"
@@ -86,6 +148,9 @@ case "$host" in
     CFLAGS="$CFLAGS -pthread"
         AC_CHECK_LIB(c_r, pthread_exit, [LIBS="$LIBS -lc_r -lkse"; pthread="yes"])
     ;;
+  *-interix3*)
+    INSTALL="./install-sh"
+    ;;
 esac
 
 AC_ARG_WITH(cflags,
@@ -96,9 +161,11 @@ AC_ARG_WITH(libs,
 [  --with-libs=FLAGS       use FLAGS for extra libraries],
 LIBS="$LIBS $withval")
 
+
 dnl implement SSL stuff.
 dnl Implement the --with-ssl option.
 
+AC_CONFIG_SECTION([Configuring OpenSSL support])
 AC_ARG_WITH(ssl,
 [  --with-ssl[=DIR]          where to look for OpenSSL libs and header files
                           DIR points to the installation [/usr/local/ssl]],
@@ -303,6 +370,9 @@ then
     esac
 fi
 
+
+AC_CONFIG_SECTION([Configuring Kannel and DB dependancies])
+
 dnl Checking for Ct-lib support
 
 AC_MSG_CHECKING(for Ct-Lib support)
@@ -417,7 +487,7 @@ else
         AC_MSG_RESULT([$gw_version])
         AC_MSG_CHECKING([Kannel libs])
         if ! $GW_CONFIG --libs &>/dev/null ; then
-                LDFLAGS="$LDFLAGS `$GW_CONFIG --libs`"
+                LIBS="$LIBS `$GW_CONFIG --libs`"
                 gw_libdir=`$GW_CONFIG --libs`
                 AC_MSG_RESULT([$gw_libdir])
         fi
@@ -429,7 +499,9 @@ else
         fi
 fi
 
-AC_CHECK_LIB([gwlib], [cfg_create], [], AC_MSG_ERROR([Kannel gwlib is required!]))
+AC_CHECK_LIB([gwlib], [cfg_create], [], 
+  [AC_MSG_ERROR([Kannel gwlib is required!])], [$LDFLAGS]
+)
 
 AC_MSG_CHECKING(for Kannel's DB support)
 
@@ -499,6 +571,30 @@ AC_SUBST(rpm_suffix, "sdb", [RPM Suffix])
 AC_SUBST(rpm_requires, "libsdb-devel >= 0.5", [RPM Requires])
 ])
 
-AC_CONFIG_FILES([Makefile gw/Makefile rpm/sqlbox.spec])
+AC_MSG_RESULT([ok])
 
+
+dnl Final Output
+
+AC_CONFIG_SECTION([Generating output files]) 
+AC_CONFIG_FILES([Makefile gw/Makefile rpm/sqlbox.spec])
 AC_OUTPUT
+
+
+dnl LICENSE notice
+
+AC_CONFIG_SECTION([License information])
+cat <<X
++--------------------------------------------------------------------+
+| License:                                                           |
+| This software is subject to the Kannel Software License, available |
+| in this distribution in the file LICENSE. By continuing this       |
+| installation process, you are bound by the terms of this license   |
+| agreement. If you do not agree with the terms of this license, you |
+| must abort the installation process at this point.                 |
+|                                                                    |
+|                      The Kannel Group <http://www.kannel.org/>     |
++--------------------------------------------------------------------+
+
+Thank you for using Kannel.
+X
