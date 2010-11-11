@@ -47,7 +47,7 @@ void sql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */);
 Msg *pgsql_fetch_msg();
 void sql_shutdown();
 struct server_type *sql_init_pgsql(Cfg *cfg);
-void sqlbox_configure_pgsql(Cfg* cfg);
+void sqlbox_configure_pgsql(Cfg *cfg);
 #ifndef sqlbox_pgsql_c
 extern
 #endif

@@ -203,9 +203,6 @@ void oracle_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
         error(0, "Oracle: DBPool Error!");
         return;
     }
-    // checking if message is unicode and converting the message back to hex values to be able to store in the database
-    if(msg->sms.coding == 2)
-             octstr_binary_to_hex(msg->sms.msgdata,1);
 
     sql = octstr_format(SQLBOX_ORACLE_INSERT_QUERY, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender),
         st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),

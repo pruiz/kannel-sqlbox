@@ -234,10 +234,6 @@ void sdb_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
         return;
     }
 
-    // checking if message is unicode and converting the message back to hex values to be able to store in the database
-    if(msg->sms.coding == 2)
-        octstr_binary_to_hex(msg->sms.msgdata,1);
-
     sql = octstr_format(queries->insert_query, sqlbox_logtable, st_str(momt), st_str(msg->sms.sender),
         st_str(msg->sms.receiver), st_str(msg->sms.udhdata), st_str(msg->sms.msgdata), st_num(msg->sms.time),
         st_str(msg->sms.smsc_id), st_str(msg->sms.service), st_str(msg->sms.account), st_num(msg->sms.sms_type),

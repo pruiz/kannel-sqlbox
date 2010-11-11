@@ -1,6 +1,16 @@
+2010-11-11  Alex Guerrieri <aguerrieri at kannel dot org>
+    * COMPATIBILITY BREAKER: Extended Stipe's patch to url-encode the udhdata
+      field as well, making it possible to send wap-push and other binary
+      messages from sqlbox.
+
+2010-11-11  Alex Guerrieri <aguerrieri at kannel dot org>
+    * COMPATIBILITY BREAKER: Modified the format in which the msgdata field was
+      stored on the database to be url-encoded. This avoids corrupting the data
+      when saving it. Thanks Stipe Tolj  <stolj at kannel.org> for this patch.
+
 2010-11-11  Alex Guerrieri <aguerrieri at kannel dor org>
-    * Fixes PostgreSQL code to properly evaluate null columns and avoid corrupting
-      numeric fields on messages.
+    * Fixes PostgreSQL code to properly evaluate null columns and avoid
+      corrupting numeric fields on messages.
 
 2010-11-02  Stipe Tolj  <stolj at kannel.org>
     * acinclude.m4: use the gateway version to have the terminal sequences and
@@ -19,16 +29,16 @@
     * gw/sqlbox.c, gw/sqlbox_[pgsql|sqlite3].c: fixed various compiler warnings.
 
 2010-09-11  Alex Guerrieri <aguerrieri at kannel dot org>
-    * Fixed bug: Not all sms messages were acked properly before, leaving messages in the message store.
-      Thanks Rene Kluwen for this patch.
+    * Fixed bug: Not all sms messages were acked properly before, leaving
+      messages in the message store. Thanks Rene Kluwen for this patch.
 
 2010-06-16 - Rene Kluwen <rene.kluwen at chimit.nl>
-    * Fixed bug that sqlbox didn't disconnect from bearerbox when one of the attached
-      smsboxes would disconnect.
+    * Fixed bug that sqlbox didn't disconnect from bearerbox when one of the
+      attached smsboxes would disconnect.
 
 2010-08-02 - Alejandro Guerrieri <aguerrieri at kannel dot org>
-    * Fixes bug that prevented single quotes to be used on message text and other fields.
-      Thanks Rene Kluwen for this patch.
+    * Fixes bug that prevented single quotes to be used on message text and
+      other fields. Thanks Rene Kluwen for this patch.
 
 2009-12-28 - Alejandro Guerrieri <aguerrieri at kannel dot org>
     * Added support for meta-data on all DB engines
@@ -41,19 +51,24 @@
 
 2008-11-21 - Alejandro Guerrieri <aguerrieri at kannel dot org>
     * Completed documentation on missing DB modules.
-    * Added RPM support. Now it's possible to build RPM's natively by running "make rpm" instead of "make".
-    * The module detects the DB engine compiled on Kannel and renames the RPM accordingly.
+    * Added RPM support. Now it's possible to build RPM's natively by running
+      "make rpm" instead of "make".
+    * The module detects the DB engine compiled on Kannel and renames the RPM
+      accordingly.
 
 2008-11-18  Alex Guerrieri <aguerrieri at kannel dot org>
     * REVISION 0.7.1 [CVS Tag: rev-0-7-1]
-    * Added support for the LibSDB database abstraction library. DB support is now similar to Kannel's.
-    * Extensive code reorganization to move the queries into the header files and allow reusing from the libsdb module.
+    * Added support for the LibSDB database abstraction library. DB support is
+      now similar to Kannel's.
+    * Extensive code reorganization to move the queries into the header files
+      and allow reusing from the libsdb module.
     * Added examples for database connections on sample conf file.
 
 2008-11-12  Alejandro Guerrieri <aguerrieri at kannel dot org>
     * REVISION 0.7.0 [CVS Tag: rev-0-7-0]
     * Added support for Oracle, SQLite2 and SQLite 3.
-    *  Binary now install under sbin instead of bin, just like all the other Kannel "boxes".
+    * Binary now install under sbin instead of bin, just like all the other
+      Kannel "boxes".
 
 2008-11-03  Alex Guerrieri <aguerrieri at kannel dot org>
     * REVISION 0.6.0 [CVS Tag: rev-0-6-0]
@@ -61,7 +76,7 @@
     * Unified CVS and Standalone versions into CVS.
 
 2006-11-06
-    * Unicode support. Many thanks to Cavit Dolgun <c dot dolgun at gmail dot com>
+    * Unicode support. Thanks to Cavit Dolgun <c dot dolgun at gmail dot com>
 
 2006-06-20
     * Postgres SQL driver fixed after a long period of being broken.
@@ -81,10 +96,10 @@
       sqlbox now reads the port value from the mysql-connection group.
 
 2005-11-01
-    * Applied patch of Thomas Gottgens: The fields udhdata and msgdata are now created
-      as blob and text fields.
-    * Also some fields of Kannel.conf are renamed to match CVS HEAD revision of the
-      gateway module.
+    * Applied patch of Thomas Gottgens: The fields udhdata and msgdata are now
+      created as blob and text fields.
+    * Also some fields of Kannel.conf are renamed to match CVS HEAD revision of
+      the gateway module.
     * mysql-username is now "username"
     * mysql-password is now "password"
     * mysql-host is now "host"

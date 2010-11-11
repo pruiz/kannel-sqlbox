@@ -66,6 +66,7 @@
 #include "gwlib/gwlib.h"
 #include "gwlib/dbpool.h"
 #include "gw/msg.h"
+#include "gw/sms.h"
 #include "gw/shared.h"
 #include "gw/bb.h"
 #include "sqlbox_sql.h"
@@ -164,6 +165,47 @@ static int sqlbox_is_single_group(Octstr *query)
     return 0;
 }
 
+
+/****************************************************************************
+ * Character convertion.
+ * 
+ * The 'msgdata' is read from the DB table as URL-encoded byte stream, 
+ * which we need to URL-decode to get the orginal message. We use this
+ * approach to get rid of the table character dependancy of the DB systems.
+ * The URL-encoded chars as a subset of ASCII which is typicall no problem
+ * for any of the supported DB systems.
+ */
+
+static int charset_processing(Msg *msg) 
+{
+    gw_assert(msg->type == sms);
+
+    /* URL-decode first */
+    if (octstr_url_decode(msg->sms.msgdata) == -1)
+        return -1;
+    if (octstr_url_decode(msg->sms.udhdata) == -1)
+        return -1;
+        
+    /* If a specific character encoding has been indicated by the
+     * user, then make sure we convert to our internal representations. */
+    if (octstr_len(msg->sms.charset)) {
+    
+        if (msg->sms.coding == DC_7BIT) {
+            /* For 7 bit, convert to UTF-8 */
+            if (charset_convert(msg->sms.msgdata, octstr_get_cstr(msg->sms.charset), "UTF-8") < 0)
+                return -1;
+        } 
+        else if (msg->sms.coding == DC_UCS2) {
+            /* For UCS-2, convert to UTF-16BE */
+            if (charset_convert(msg->sms.msgdata, octstr_get_cstr(msg->sms.charset), "UTF-16BE") < 0) 
+                return -1;
+        }
+    }
+    
+    return 0;
+}
+
+
 /*
  *-------------------------------------------------
  *  receiver thingies
@@ -209,10 +251,6 @@ static int send_msg(Connection *conn, Boxc *boxconn, Msg *pmsg)
 {
     Octstr *pack;
 
-    // checking if the message is unicode and converting it to binary for submitting
-    if(pmsg->sms.coding == 2)
-    octstr_hex_to_binary(pmsg->sms.msgdata);
-
     pack = msg_pack(pmsg);
 
     if (pack == NULL)
@@ -247,12 +285,12 @@ static void smsbox_to_bearerbox(void *arg)
 
         if (msg_type(msg) == sms) {
             debug("sqlbox", 0, "smsbox_to_bearerbox: sms received");
-	    msg_escaped = msg_duplicate(msg);
-	    gw_sql_save_msg(msg_escaped, octstr_imm("MT"));
-	    msg_destroy(msg_escaped);
-	}
+            msg_escaped = msg_duplicate(msg);
+            gw_sql_save_msg(msg_escaped, octstr_imm("MT"));
+            msg_destroy(msg_escaped);
+        }
 
-	send_msg(conn->bearerbox_connection, conn, msg);
+        send_msg(conn->bearerbox_connection, conn, msg);
 
         /* if this is an identification message from an smsbox instance */
         if (msg_type(msg) == admin && msg->admin.command == cmd_identify) {
@@ -361,22 +399,22 @@ static void bearerbox_to_smsbox(void *arg)
 
     while (sqlbox_status == SQL_RUNNING && conn->alive) {
 
-    msg = read_from_box(conn->bearerbox_connection, conn);
+        msg = read_from_box(conn->bearerbox_connection, conn);
 
-    if (msg == NULL) {
-        /* tell sqlbox to die */
-	conn->alive = 0;
-	debug("sqlbox", 0, "bearerbox_to_smsbox: connection to bearerbox died.");
-	break;
-    }
-    if (msg_type(msg) == admin) {
-	if (msg->admin.command == cmd_shutdown || msg->admin.command == cmd_restart) {
+        if (msg == NULL) {
             /* tell sqlbox to die */
-	    conn->alive = 0;
-            debug("sqlbox", 0, "bearerbox_to_smsbox: Bearerbox told us to shutdown.");
-	    break;
-	}
-    }
+            conn->alive = 0;
+            debug("sqlbox", 0, "bearerbox_to_smsbox: connection to bearerbox died.");
+            break;
+        }
+        if (msg_type(msg) == admin) {
+            if (msg->admin.command == cmd_shutdown || msg->admin.command == cmd_restart) {
+                /* tell sqlbox to die */
+                conn->alive = 0;
+                debug("sqlbox", 0, "bearerbox_to_smsbox: Bearerbox told us to shutdown.");
+                break;
+            }
+        }
 
         if (msg_type(msg) == heartbeat) {
         // todo
@@ -385,18 +423,18 @@ static void bearerbox_to_smsbox(void *arg)
             continue;
         }
         if (!conn->alive) {
-	    msg_destroy(msg);
-	    break;
-	}
-    if (msg_type(msg) == sms) {
-	msg_escaped = msg_duplicate(msg);
-        if (msg->sms.sms_type != report_mo)
-            gw_sql_save_msg(msg_escaped, octstr_imm("MO"));
-        else
-            gw_sql_save_msg(msg_escaped, octstr_imm("DLR"));
-	msg_destroy(msg_escaped);
-    }
-    send_msg(conn->smsbox_connection, conn, msg);
+            msg_destroy(msg);
+            break;
+        }
+        if (msg_type(msg) == sms) {
+            msg_escaped = msg_duplicate(msg);
+            if (msg->sms.sms_type != report_mo)
+                gw_sql_save_msg(msg_escaped, octstr_imm("MO"));
+            else
+                gw_sql_save_msg(msg_escaped, octstr_imm("DLR"));
+            msg_destroy(msg_escaped);
+        }
+        send_msg(conn->smsbox_connection, conn, msg);
         msg_destroy(msg);
     }
     /* the client closes the connection, after that die in receiver */
@@ -547,6 +585,11 @@ static void sql_to_bearerbox(void *arg)
 
     while (sqlbox_status == SQL_RUNNING && boxc->alive) {
         if ((msg = gw_sql_fetch_msg()) != NULL) {
+            if (charset_processing(msg) == -1) {
+                error(0, "Could not charset process message, dropping it!");
+                msg_destroy(msg);
+                continue;
+            }
             if (global_sender != NULL && (msg->sms.sender == NULL || octstr_len(msg->sms.sender) == 0)) {
                 msg->sms.sender = octstr_duplicate(global_sender);
             }

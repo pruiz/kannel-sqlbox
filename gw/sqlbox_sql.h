@@ -12,7 +12,7 @@
 
 struct server_type {
     Octstr *type;
-    void (*sql_enter) (Cfg *cfg);
+    void (*sql_enter) (Cfg *);
     void (*sql_leave) ();
     Msg *(*sql_fetch_msg) ();
     void (*sql_save_msg) (Msg *, Octstr *);
@@ -38,14 +38,19 @@ extern
 struct server_type *sql_type;
 
 #define gw_sql_fetch_msg sql_type->sql_fetch_msg
-#define gw_sql_save_msg sql_type->sql_save_msg
+#define gw_sql_save_msg(message, table) \
+    do { \
+        octstr_url_encode(message->sms.msgdata); \
+        octstr_url_encode(message->sms.udhdata); \
+        sql_type->sql_save_msg(message, table); \
+    } while (0)
 #define gw_sql_enter sql_type->sql_enter
 #define gw_sql_leave sql_type->sql_leave
 
 /* Macro to run the queries to create tables */
 #define sqlbox_run_query(query, table) \
 if (query != NULL) { \
-    sql = octstr_format(query, table, table, table ); \
+    sql = octstr_format(query, table, table, table); \
     sql_update(pc, sql); \
     octstr_destroy(sql); \
 }

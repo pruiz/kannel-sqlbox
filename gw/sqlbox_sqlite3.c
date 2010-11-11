@@ -198,10 +198,6 @@ void sqlite3_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */)
     int stuffcount = 0;
     DBPoolConn *pc;
 
-    // checking if message is unicode and converting the message back to hex values to be able to store in the database
-    if(msg->sms.coding == 2)
-             octstr_binary_to_hex(msg->sms.msgdata,1);
-
     pc = dbpool_conn_consume(pool);
     if (pc == NULL) {
         error(0, "SQLITE3: Database pool got no connection! DB update failed!");
