@@ -168,8 +168,8 @@ void pgsql_leave()
     dbpool_destroy(pool);
 }
 
-#define octstr_null_create(x) ((PQgetvalue(res, 0, x) != NULL) ? octstr_create(PQgetvalue(res, 0, x)) : octstr_create(""))
-#define atol_null(x) ((PQgetvalue(res, 0, x) != NULL) ? atol(PQgetvalue(res, 0, x)) : -1)
+#define octstr_null_create(x) (octstr_create(PQgetvalue(res, 0, x)))
+#define atol_null(x) ((PQgetisnull(res, 0, x) == 0) ? atol(PQgetvalue(res, 0, x)) : -1)
 Msg *pgsql_fetch_msg()
 {
     Msg *msg = NULL;
