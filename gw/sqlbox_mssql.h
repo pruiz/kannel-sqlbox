@@ -46,7 +46,7 @@ deferred, dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo, meta_da
 void sql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */);
 Msg *mssql_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_mssql(Cfg *cfg);
+struct server_type *sqlbox_init_mssql(Cfg *cfg);
 #ifndef sqlbox_mssql_c
 extern
 #endif

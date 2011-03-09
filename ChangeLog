@@ -1,3 +1,8 @@
+2011-03-09  Alex Guerrieri <aguerrieri at kannel dot org>
+    * gw/sqlbox_[mssql|mysql|oracle|pgsql|sdb|sqlite|sqlite3].h: Fixed
+      segmentation fault when running on 64-bit environments. Thanks
+      Andreas Fink for identifying the reason behind the problem.
+
 2010-11-11  Alex Guerrieri <aguerrieri at kannel dot org>
     * COMPATIBILITY BREAKER: Extended Stipe's patch to url-encode the udhdata
       field as well, making it possible to send wap-push and other binary

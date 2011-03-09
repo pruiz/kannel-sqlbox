@@ -21,7 +21,7 @@ NULL, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, \
 void sql_save_msg(Msg *msg, Octstr *momt );
 Msg *sdb_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_sdb(Cfg *cfg);
+struct server_type *sqlbox_init_sdb(Cfg *cfg);
 #ifndef sqlbox_sdb_c
 extern
 #endif

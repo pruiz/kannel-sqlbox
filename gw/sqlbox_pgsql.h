@@ -46,7 +46,7 @@ dlr_mask, dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo, meta_data) VALUES
 void sql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */);
 Msg *pgsql_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_pgsql(Cfg *cfg);
+struct server_type *sqlbox_init_pgsql(Cfg *cfg);
 void sqlbox_configure_pgsql(Cfg *cfg);
 #ifndef sqlbox_pgsql_c
 extern

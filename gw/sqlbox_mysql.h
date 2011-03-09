@@ -48,7 +48,7 @@ NULL, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, %S, \
 void sql_save_msg(Msg *msg, Octstr *momt);
 Msg *mysql_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_mysql(Cfg *cfg);
+struct server_type *sqlbox_init_mysql(Cfg* cfg);
 #ifndef sqlbox_mysql_c
 extern
 #endif

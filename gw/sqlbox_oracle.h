@@ -54,7 +54,7 @@ FOR EACH ROW BEGIN SELECT \"%S_seq\".nextval INTO :new.\"sql_id\" FROM DUAL; END
 void sql_save_msg(Msg *msg, Octstr *momt /*, Octstr smsbox_id */);
 Msg *oracle_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_oracle(Cfg *cfg);
+struct server_type *sqlbox_init_oracle(Cfg *cfg);
 #ifndef sqlbox_oracle_c
 extern
 #endif

@@ -41,7 +41,7 @@ dlr_url, pid, alt_dcs, rpi, charset, boxc_id, binfo, meta_data) VALUES (NULL, %S
 void sql_save_msg(Msg *msg, Octstr *momt );
 Msg *sqlite_fetch_msg();
 void sql_shutdown();
-struct server_type *sql_init_sqlite(Cfg *cfg);
+struct server_type *sqlbox_init_sqlite(Cfg *cfg);
 #ifndef sqlbox_sqlite_c
 extern
 #endif
