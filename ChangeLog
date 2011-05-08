@@ -1,3 +1,7 @@
+2011-05-08  Rene Kluwen <rene dot kluwen at chimit dot nl>
+    * gw/sqlbox.c
+      fixed memory leak sending messages through the send_sms table
+
 2011-03-09  Alex Guerrieri <aguerrieri at kannel dot org>
     * gw/sqlbox_[mssql|mysql|oracle|pgsql|sdb|sqlite|sqlite3].h: Fixed
       segmentation fault when running on 64-bit environments. Thanks

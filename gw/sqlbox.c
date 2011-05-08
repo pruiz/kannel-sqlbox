@@ -599,6 +599,7 @@ static void sql_to_bearerbox(void *arg)
         else {
             gwthread_sleep(SLEEP_BETWEEN_SELECTS);
         }
+        msg_destroy(msg);
     }
 
     boxc_destroy(boxc);
