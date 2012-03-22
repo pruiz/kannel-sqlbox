@@ -12,6 +12,7 @@ SINGLE_GROUP(sqlbox,
     OCTSTR(bearerbox-host)
     OCTSTR(smsbox-port)
     OCTSTR(smsbox-port-ssl)
+    OCTSTR(sql-engine)
     OCTSTR(sql-log-table)
     OCTSTR(sql-insert-table)
     OCTSTR(log-file)
